@@ -14,8 +14,8 @@ Platform:
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/typescript/-/typescript-3.4.1.tgz: unexpected end of file
-      at Zlib.zlibOnError [as onerror] (zlib.js:162:17)
+  Error: connect ECONNREFUSED 104.16.23.35:443
+      at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1088:14)
 
 npm manifest: 
   {
@@ -14146,6 +14146,12 @@ Lockfile:
     dependencies:
       react-svg-loader "^2.1.0"
   
+  react-app-rewire-svg-react-loader@codebandits/react-app-rewire-svg-react-loader:
+    version "1.0.0"
+    resolved "https://codeload.github.com/codebandits/react-app-rewire-svg-react-loader/tar.gz/1fc7da4e5847782b7152fa57c42ef84270d26d0e"
+    dependencies:
+      svg-react-loader "^0.4.5"
+  
   react-app-rewired@1.6.2:
     version "1.6.2"
     resolved "https://registry.yarnpkg.com/react-app-rewired/-/react-app-rewired-1.6.2.tgz#32ce90abc2c4e2b86c71e4e270bd36663b3b1c9a"
@@ -16174,7 +16180,7 @@ Lockfile:
     dependencies:
       has-flag "^3.0.0"
   
-  svg-react-loader@^0.4.6:
+  svg-react-loader@^0.4.5, svg-react-loader@^0.4.6:
     version "0.4.6"
     resolved "https://registry.yarnpkg.com/svg-react-loader/-/svg-react-loader-0.4.6.tgz#b263efb3e3d2fff4c682a729351aba5f185051a1"
     integrity sha512-HVEypjWQsQuJdBIPzXGxpmQsQts7QwfQuYgK1rah6BVCMoLNSCh/ESKVNd7/tHq8DkWYHHTyaUMDA1FjqZYrgA==

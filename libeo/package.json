@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "NODE_ENV=development nodemon",
+    "dev": "nodemon",
     "debug": "nodemon --config nodemon-debug.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "pm2-runtime start pm2-config.json",
