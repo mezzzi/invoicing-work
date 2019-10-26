@@ -1,0 +1,41 @@
+.partner-header {
+  margin-bottom: 32px;
+}
+
+.partner-detail {
+  margin-bottom: 10px;
+}
+
+.partner-detail-label {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 10px;
+  color: #8A8A8A;
+  letter-spacing: 0;
+}
+
+.partner-detail-value {
+  font-weight: 500;
+  font-size: 16px;
+  color: #0D1B2A;
+  letter-spacing: 0;
+}
+
+.partner-addresses {
+  margin-top: 40px;
+}
+
+.partner-address-row {
+  font-weight: 500;
+  font-size: 14px;
+  color: #989CA8;
+  letter-spacing: 0;
+}
+
+.partner-contacts {
+  margin-top: 20px;
+}
+
+.partner-contacts .ant-card {
+  cursor: pointer;
+}

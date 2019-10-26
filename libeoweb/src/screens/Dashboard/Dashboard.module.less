@@ -1,0 +1,207 @@
+.Dashboard_Actions .ant-btn {
+  margin-left: 27px;
+  width: 156px;
+  padding: 0;
+}
+
+.dashboard {
+
+  .ant-steps-item {
+    width: 20%;
+  }
+
+  .ant-steps {
+    padding-top: 15px;
+
+    .ant-steps-item-tail {
+      margin: 0 0 0 50%;
+    }
+
+    .ant-steps-item-content {
+      margin-top: 30px;
+      width: 100%;
+    }
+
+    .ant-steps-item-icon {
+      position: absolute;
+      margin-left: 0;
+      left: 50%;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  .ant-steps-item-tail:after {
+    height: 3px;
+    width: calc(100% + 3px);
+    margin-left: 0px;
+  }
+
+  .ant-steps-item-tail:after,
+  .ant-steps-item-wait .ant-steps-item-icon > .ant-steps-icon .ant-steps-icon-dot {
+    background: #DFDFDF;
+  }
+
+  .ant-steps-item-finish > .ant-steps-item-tail:after {
+    background: #51DAF3;
+  }
+
+  .ant-steps-item:not(:first-child).ant-steps-item-process:before {
+    content: "";
+    display: inline-block;
+    height: 3px;
+    border-radius: 1px;
+    background: linear-gradient(to right, #51DAF3 0%, #0053FA 100%);
+    top: 2px;
+    position: absolute;
+    transform: translate(-100%, 0);
+    width: calc(100% - 16px);
+  }
+
+  .ant-steps-item-title {
+    font-weight: @font-bold;
+    font-size: 12px;
+    letter-spacing: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      margin-right: 5px;
+      vertical-align: middle;
+      color: inherit;
+    }
+  }
+
+  .ant-steps-item-process > .ant-steps-item-content > .ant-steps-item-title {
+    color: @primary-color;
+  }
+
+  .ant-steps-item-finish > .ant-steps-item-content > .ant-steps-item-title {
+    color: #1DAEFE;
+  }
+
+  .ant-steps-item-process,
+  .ant-steps-item-finish {
+
+    .dot-finish {
+      background: white;
+      border: 2px solid #51DAF3;
+      color: #51DAF3;
+
+      svg {
+        color: #51DAF3;
+      }
+    }
+
+    .dot-process {
+      border: 2px solid @primary-color;
+      background-color: @primary-color;
+
+      svg {
+        color: white;
+      }
+    }
+
+    .dot-finish,
+    .dot-process {
+      position: relative;
+      z-index: 2;
+      width: 35px;
+      height: 35px;
+      line-height: 33px;
+      border-radius: 100%;
+      transform: translate(-50%, -14px);
+      left: 50%;
+
+      svg {
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .chart-dashboard-line {
+
+    text {
+      fill: @text-color !important;
+    }
+  }
+
+  .chart-dashboard-line,
+  .chart-dashboard-pie {
+    width: 100%;
+    text-align: left;
+
+    .chart-wrapper-outer {
+      height: 250px;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    text {
+      font-weight: @font-bold;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .chart-dashboard-title {
+      padding-left: 15px;
+      font-weight: @font-medium;
+      font-size: 20px;
+      color: #0D1B2A;
+      letter-spacing: 0;
+    }
+
+    .chart-dashboard-solde {
+      padding-left: 15px;
+      font-weight: @font-bold;
+      font-size: 40px;
+      color: @default-color;
+      letter-spacing: 0;
+    }
+
+    .chart-dashboard-description {
+      padding-left: 15px;
+      font-weight: @font-medium;
+      font-size: 15px;
+      color: @text-color;
+      letter-spacing: 0;
+    }
+  }
+
+  .card-dashboard {
+    padding-left: 44px;
+    padding-right: 44px;
+    text-align: center;
+
+    svg {
+      height: 150px;
+    }
+
+    .card-dashboard-title {
+      margin-top: 20px;
+      font-weight: @font-bold;
+      font-size: 16px;
+      color: #0D1B2A;
+      letter-spacing: 0;
+      text-align: center;
+    }
+
+    .card-dashboard-description {
+      margin-top: 10px;
+      font-weight: @font-medium;
+      font-size: 15px;
+      color: @text-color;
+      letter-spacing: 0;
+      text-align: center;
+      line-height: 23px;
+    }
+
+    button {
+      margin-top: 10px;
+    }
+  }
+}

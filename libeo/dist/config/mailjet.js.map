@@ -1,0 +1,1 @@
+{"version":3,"file":"mailjet.js","sourceRoot":"","sources":["../../src/config/mailjet.ts"],"names":[],"mappings":";;AAAA,MAAM,aAAa,GAAG;IACpB,cAAc,EAAE,OAAO,CAAC,GAAG,CAAC,cAAc;IAC1C,iBAAiB,EAAE,OAAO,CAAC,GAAG,CAAC,iBAAiB;CACjD,CAAC;AAEF,kBAAe,aAAa,CAAC"}

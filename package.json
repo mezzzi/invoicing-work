@@ -1,0 +1,34 @@
+{
+  "name": "libeoproject",
+  "version": "0.2.0",
+  "private": true,
+  "engines": {
+    "node": "11"
+  },
+  "scripts": {
+    "doco": "docker-compose -f docker-compose.dev.yml",
+    "up": "yarn doco up",
+    "down": "yarn doco down",
+    "logs": "yarn doco logs -f api"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn workspaces run precommit"
+    }
+  },
+  "workspaces": {
+    "packages": [
+      "libeoweb",
+      "libeo"
+    ],
+    "nohoist": [
+      "**/husky",
+      "**/husky/**",
+      "**/lint-staged",
+      "**/lint-staged/**"
+    ]
+  },
+  "dependencies": {
+    "react-app-rewire-react-svg-loader": "^1.0.1"
+  }
+}

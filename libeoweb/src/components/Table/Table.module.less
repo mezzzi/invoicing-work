@@ -1,0 +1,210 @@
+.table-invoices {
+  .ant-table table {
+    border-collapse: separate;
+    border-spacing: 0px 10px;
+  }
+
+  .ant-table-tbody {
+
+    .ant-tag {
+      margin-right: 0;
+    }
+
+    & > tr {
+      cursor: pointer;
+
+      &.ant-table-row-selected {
+        background: #F7FAFE;
+        box-shadow: 0 1px 10px 0 rgba(0,116,249,0.10);
+        border: 1px solid #DDECFD;
+
+        td {
+          background: transparent;
+          border: 0;
+          border-top: 1px solid #DDECFD;
+          border-bottom: 1px solid #DDECFD;
+
+          &:first-child {
+            border-left: 1px solid #DDECFD;
+          }
+
+          &:last-child {
+            border-right: 1px solid #DDECFD;
+          }
+        }
+      }
+
+      & > td {
+        border: 0;
+        border-bottom: 1px solid rgba(0, 116, 249, 0.15);
+      }
+
+      &.tr-invoice-loading {
+        background: repeating-linear-gradient(
+          45deg,
+          #ECECEC,
+          #ECECEC 2px,
+          #ffffff 2px,
+          #ffffff 7px
+        );
+
+        & > td {
+          background: none;
+        }
+
+        &:not(.ant-table-row-selected) > td {
+          border: 0;
+          border-top: 1px solid #DFDFDF;
+          border-bottom: 1px solid #DFDFDF;
+
+          &:first-child {
+            border-left: 1px solid #DFDFDF;
+          }
+
+          &:last-child {
+            border-right: 1px solid #DFDFDF;
+          }
+        }
+      }
+    }
+  }
+
+  .ant-checkbox-inner {
+    border: 1px solid #77B7FF;
+    border-radius: 1px
+  }
+
+  .ant-checkbox-checked .ant-checkbox-inner:after,
+  .ant-checkbox-checked:after,
+  .ant-checkbox-inner:after {
+    display: block;
+  }
+
+  th {
+
+    &.td-cta,
+    &.td-total,
+    &.td-error,
+    &.td-importAt,
+    &.td-status,
+    &.td-dueDate {
+      text-align: center;
+    }
+  }
+
+  td {
+
+    .ant-tag {
+      margin: 0 !important;
+    }
+
+    &.td-actions {
+      padding: 0 !important;
+      text-align: center;
+    }
+    &.td-number {
+      font-weight: @font-semi-bold;
+      font-size: 12px;
+      color: @light-color;
+      letter-spacing: 0;
+    }
+    &.td-receiverTitle {
+      font-weight: 500;
+      font-size: 14px;
+      color: @default-color;
+      letter-spacing: 0;
+    }
+    &.td-companyEmitter,
+    &.td-companyReceiver {
+      font-weight: 400;
+      font-size: 12px;
+      color: @default-color;
+      letter-spacing: 0;
+    }
+    &.td-createdAt,
+    &.td-dueDate,
+    &.td-importAt {
+      font-weight: @font-semi-bold;
+      font-size: 12px;
+      color: @light-color;
+      letter-spacing: 0;
+      text-align: center !important;
+    }
+    &.td-totalWoT,
+    &.td-total {
+      font-weight: @font-bold;
+      font-size: 14px;
+      color: @default-color;
+      letter-spacing: 0;
+      text-align: center !important;
+    }
+    .table-color {
+      color: @primary-color;
+    }
+    .table-color-payin {
+      color: @light-green;
+    }
+    .table-color-payout {
+      color: @light-red;
+    }
+    &.td-status {
+      text-align: center !important;
+    }
+
+    &.td-error {
+      text-align: center !important;
+    }
+
+    &.td-cta {
+      text-align: center !important;
+    }
+
+    &.td-cta .ant-btn {
+      display: inline-block !important;
+    }
+
+    &.td-concatened {
+      font-weight: @font-semi-bold;
+      font-size: 10px;
+      color: @light-color;
+      letter-spacing: 0;
+
+      .title {
+        font-weight: 500;
+        font-size: 14px;
+        color: @default-color;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        font-weight: 400;
+        font-size: 10px;
+        color: @default-color;
+        letter-spacing: 0;
+      }
+    }
+
+    &.td-chevron {
+      padding: 0 !important;
+
+      svg {
+        color: @default-color;
+      }
+    }
+
+    &.td-createdDate,
+    &.td-description {
+      font-weight: @font-regular;
+      font-size: 14px;
+      color: @default-color;
+      letter-spacing: 0;
+    }
+
+    &.td-amount {
+      font-weight: @font-bold;
+      font-size: 14px;
+      color: #B5B9C5;
+      letter-spacing: 0;
+    }
+  }
+}

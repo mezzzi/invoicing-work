@@ -1,0 +1,139 @@
+{
+  "data": {
+    "partners": {
+      "total": 3,
+      "rows": [
+        {
+          "id": "7",
+          "siren": "344223383",
+          "siret": "34422338300045",
+          "name": "TEST",
+          "brandName": null,
+          "naf": "46.43Z",
+          "nafNorm": "NAFRev2",
+          "numberEmployees": "NN",
+          "legalForm": "5499",
+          "category": "PME",
+          "vatNumber": "FR13344223383",
+          "capital": null,
+          "phone": null,
+          "incorporationAt": 1178668800000,
+          "source": "original",
+          "treezorEmail": null,
+          "treezorUserId": null,
+          "treezorWalletId": null,
+          "treezorIban": null,
+          "treezorBic": null,
+          "createdAt": 1553165118808,
+          "updatedAt": 1553165118808,
+          "status": "ALREADY",
+          "__typename": "Company",
+          "addresses": {
+            "total": 1,
+            "rows": [
+              {
+                "id": "3",
+                "address1": "QUA HASQUETTE",
+                "address2": null,
+                "siret": "34422338300045",
+                "zipcode": 64240,
+                "city": "HASPARREN",
+                "country": "France",
+                "__typename": "Address"
+              }
+            ],
+            "__typename": "Addresses"
+          },
+          "contacts": { "total": 0, "rows": [], "__typename": "Contacts" }
+        },
+        {
+          "id": "8",
+          "siren": "521313106",
+          "siret": "52131310600010",
+          "name": "TEST",
+          "brandName": null,
+          "naf": "96.09Z",
+          "nafNorm": "NAFRev2",
+          "numberEmployees": null,
+          "legalForm": "5499",
+          "category": "PME",
+          "vatNumber": "FR85521313106",
+          "capital": null,
+          "phone": null,
+          "incorporationAt": 1270080000000,
+          "source": "original",
+          "treezorEmail": null,
+          "treezorUserId": null,
+          "treezorWalletId": null,
+          "treezorIban": null,
+          "treezorBic": null,
+          "createdAt": 1553165122748,
+          "updatedAt": 1553165122748,
+          "status": "ALREADY",
+          "__typename": "Company",
+          "addresses": {
+            "total": 1,
+            "rows": [
+              {
+                "id": "4",
+                "address1": "6 RUE DESIRE NIEL",
+                "address2": null,
+                "siret": "52131310600010",
+                "zipcode": 6000,
+                "city": "NICE",
+                "country": "France",
+                "__typename": "Address"
+              }
+            ],
+            "__typename": "Addresses"
+          },
+          "contacts": { "total": 0, "rows": [], "__typename": "Contacts" }
+        },
+        {
+          "id": "9",
+          "siren": "428732804",
+          "siret": "42873280400011",
+          "name": "TEST",
+          "brandName": null,
+          "naf": "10.71C",
+          "nafNorm": "NAFRev2",
+          "numberEmployees": "NN",
+          "legalForm": "5499",
+          "category": "PME",
+          "vatNumber": "FR55428732804",
+          "capital": null,
+          "phone": null,
+          "incorporationAt": 946684800000,
+          "source": "original",
+          "treezorEmail": null,
+          "treezorUserId": null,
+          "treezorWalletId": null,
+          "treezorIban": null,
+          "treezorBic": null,
+          "createdAt": 1553165125956,
+          "updatedAt": 1553165125956,
+          "status": "ALREADY",
+          "__typename": "Company",
+          "addresses": {
+            "total": 1,
+            "rows": [
+              {
+                "id": "5",
+                "address1": "2 RUE SOLFERINO",
+                "address2": null,
+                "siret": "42873280400011",
+                "zipcode": 64000,
+                "city": "PAU",
+                "country": "France",
+                "__typename": "Address"
+              }
+            ],
+            "__typename": "Addresses"
+          },
+          "contacts": { "total": 0, "rows": [], "__typename": "Contacts" }
+        }
+      ],
+      "__typename": "Companies"
+    }
+  }
+}

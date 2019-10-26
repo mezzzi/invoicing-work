@@ -1,0 +1,54 @@
+.contact-actions {
+  display: flex;
+
+  > * {
+    margin-right: 10px;
+  }
+}
+
+.company-contacts {
+  margin-top: 40px;
+
+  .company-contacts-col {
+    margin-top: 15px;
+
+    &:hover {
+      .company-contacts-row-edit {
+        opacity: 1;
+      }
+    }
+  }
+
+  .company-contacts-row-edit {
+    opacity: 0;
+    cursor: pointer;
+    display: flex;
+    width: 30px;
+    height: 25px;
+    justify-content: center;
+    align-items: center;
+
+    svg {
+      color: @light-color;
+    }
+  }
+
+  .company-contacts-row-title {
+    font-weight: @font-medium;
+    font-size: 14px;
+    color: @default-color;
+    letter-spacing: 0;
+    display: flex;
+
+    span {
+      flex: 1;
+    }
+  }
+
+  .company-contacts-row {
+    font-weight: 500;
+    font-size: 14px;
+    color: @light-color;
+    letter-spacing: 0;
+  }
+}

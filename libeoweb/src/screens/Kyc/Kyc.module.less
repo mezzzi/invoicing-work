@@ -1,0 +1,252 @@
+@sidebar-width: 308px;
+
+.kyc-outter {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 100vh;
+  height: inherit;
+  height: auto;
+  overflow: hidden;
+
+  .kyc-children {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - @footer-bar-height);
+    padding: 50px 50px 56px;
+    overflow: auto;
+  }
+
+  .kyc-wrapper {
+    flex: 1;
+    height: calc(100vh - @footer-bar-height);
+    overflow: auto;
+
+    &.kyc-sign {
+
+      .kyc-children {
+        padding-bottom: 0px;
+      }
+    }
+
+    &.kyc-intro {
+      height: 100vh;
+    }
+  }
+
+  .kyc-sidebar-outer {
+    position: relative;
+    height: 100vh;
+    width: 308px;
+
+    &.kyc-sidebar-outer-hidden {
+      width: 0;
+    }
+  }
+
+  .kyc-sidebar {
+    background: @primary-color;
+    width: @sidebar-width;
+    display: flex;
+    flex-direction: column;
+    padding: 10% 40px;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transition: transform 0.2s ease-out;
+    transform: translate(100%, 0);
+    justify-content: center;
+    align-items: center;
+
+    &.kyc-sidebar-visible {
+      transform: translate(0, 0);
+    }
+
+    &.kyc-sidebar-hidden {
+      transform: translate(100%, 0);
+    }
+  }
+
+  .kyc-sidebar-item {
+    display: flex;
+    font-weight: @font-medium;
+    font-size: 11px;
+    line-height: 20px;
+    color: #DFDFDF;
+    letter-spacing: 0;
+    min-height: 20%;
+
+    .kyc-sidebar-item-title {
+      font-weight: @font-medium;
+      font-size: 15px;
+      line-height: 24px;
+      margin-bottom: 10px;
+      color: #FFFFFF;
+      letter-spacing: 0;
+      opacity: 0.5;
+
+      span {
+        margin-right: 10px;
+      }
+
+      svg {
+        opacity: 0.5;
+        vertical-align: top;
+      }
+    }
+
+    .kyc-sidebar-item-description {
+      opacity: 0;
+    }
+
+    .kyc-sidebar-item-index {
+      position: static;
+      width: 25px;
+      height: 25px;
+      line-height: 24px;
+      text-align: center;
+      color: white;
+      font-weight: @font-medium;
+      font-size: 15px;
+      letter-spacing: 0;
+      border-radius: 100%;
+      margin-right: 15px;
+      border: 1px solid #FFF;
+
+      &:before {
+        content: ' ';
+        width: 1px;
+        height: calc(100% - 24px);
+        position: absolute;
+        background: white;
+        left: 12px;
+        margin-top: 24px;
+        opacity: 0.4;
+      }
+    }
+
+    &:last-child {
+      .kyc-sidebar-item-index {
+        &:before {
+          content: none;
+        }
+      }
+    }
+
+    &.active,
+    &.done {
+
+      .kyc-sidebar-item-title {
+        opacity: 1;
+      }
+
+      .kyc-sidebar-item-description {
+        opacity: 1;
+      }
+    }
+
+    &.active {
+
+      .kyc-sidebar-item-index {
+        color: @primary-color;
+        background: #FFFFFF;
+        font-weight: @font-medium;
+        border: 1px solid #002D89;
+        box-shadow: 0 2px 4px 1px rgba(0,0,0,0.27);
+      }
+    }
+
+    &.done {
+
+      .kyc-sidebar-item-index {
+        color: @primary-color;
+        background: #FFFFFF;
+        font-weight: @font-medium;
+
+        &:before {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .kyc-subtitle {
+    font-weight: @font-light;
+    font-size: 25px;
+    color: #000000;
+    letter-spacing: 0;
+    line-height: 40px;
+  }
+
+  .kyc-hint-title {
+    margin: 10px 0 15px;
+    font-weight: @font-bold;
+    font-size: 11px;
+    color: @primary-color;
+    letter-spacing: 0;
+    text-decoration: underline;
+    text-transform: uppercase;
+  }
+
+  .kyc-hint-description {
+    font-weight: @font-regular;
+    font-size: 14px;
+    color: @light-color;
+    letter-spacing: 0;
+    line-height: 21px;
+  }
+}
+
+.quality-assurance-dialog {
+  width: inherit !important;
+  max-width: 80vw;
+  max-height: 90vh;
+  top: 5vh;
+  overflow: hidden;
+
+  .ant-modal-content,
+  .ant-modal-body,
+  .body-dialog,
+  .quality-assurance-preview {
+    height: 100%;
+  }
+
+  &.ant-modal.dialog .ant-modal-body {
+    padding: 14px;
+  }
+
+  .quality-assurance-preview {
+    display: flex;
+    width: 100%;
+
+    .quality-assurance-form {
+      flex: 1;
+      height: 100%;
+    }
+
+    .preview-content {
+      height: 100%;
+      max-width: 50%;
+
+      canvas,
+      img {
+        height: 100%;
+      }
+    }
+
+    .quality-assurance-title {
+      font-weight: @font-medium;
+      color: @default-color;
+      letter-spacing: 0;
+      line-height: 27px;
+      margin-bottom: 10%;
+      font-size: 16px;
+    }
+
+    .ant-btn {
+      display: inline-block;
+      margin-right: 10px !important;
+    }
+  }
+}

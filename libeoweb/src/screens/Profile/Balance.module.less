@@ -1,0 +1,36 @@
+.balance-card {
+  min-width: 250px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 4px 0 rgba(0,83,250,0.34);
+  text-align: center;
+  padding: 14px 0;
+  margin-bottom: 40px;
+
+  > * {
+    padding: 0 14px;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid @lighter-color;
+    padding: 14px 30px 0 14px;
+    line-height: 16px;
+
+    > span {
+      border-bottom: 1px solid @primary-color;
+    }
+
+    .dot3-wrapper {
+      color: @primary-color;
+      padding: 5px;
+      position: absolute;
+      right: 5px;
+
+      svg {
+        transform: rotate(90deg);
+        transform-origin: top center;
+      }
+    }
+  }
+}

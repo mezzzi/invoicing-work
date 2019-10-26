@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*"],
+  "exclude": ["libeoweb", "node_modules", "src/**/*.spec.ts"]
+}

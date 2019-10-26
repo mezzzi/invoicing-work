@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Cypress" time="22.854" tests="1" failures="0">
+  <testsuite name="Cypress root suite" timestamp="2019-05-08T13:56:00" tests="0" failures="0" time="0">
+  </testsuite>
+  <testsuite name="Signup" timestamp="2019-05-08T13:56:00" tests="0" failures="0" time="0">
+  </testsuite>
+  <testsuite name="Signup (http://localhost:3000)" timestamp="2019-05-08T13:56:00" tests="1" failures="0" time="22.854">
+    <testcase name="Signup Signup (http://localhost:3000) Form values" time="22.854" classname="Form values">
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,38 @@
+.local-upload-outer {
+
+  .local-upload-preview {
+    border-radius: 10px;
+    border: 1.6px dashed @primary-color;
+    overflow: hidden;
+    background: #FFFFFF;
+    width: 100%;
+    min-height: 150px;
+    position: relative;
+    margin-bottom: 24px;
+
+    .preview-content {
+      overflow: hidden;
+      width: 100%;
+      position: relative;
+
+      & > * {
+        width: 100%;
+      }
+    }
+
+    .local-upload-preview-close {
+      position: absolute;
+      z-index: 9;
+      top: 0;
+      right: 0px;
+      width: 25px;
+      height: 25px;
+      padding: 8px;
+      cursor: pointer;
+    }
+  }
+
+  .local-upload-wrapper {
+    width: 100%;
+  }
+}

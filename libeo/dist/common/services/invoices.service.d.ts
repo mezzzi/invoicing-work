@@ -1,0 +1,32 @@
+import { Repository } from 'typeorm';
+import { Invoice, InvoiceStatus } from '../entities/invoice.entity';
+import { CreateInvoiceDto } from '../dto/invoices.dto';
+import { User } from '../entities/user.entity';
+import { CompaniesService } from './companies.service';
+import { List } from '../interfaces/common.interface';
+import { Company } from '../entities/company.entity';
+import { PartnersService } from './partners.service';
+import { IbansService } from './ibans.service';
+import { EmailService } from '../../notification/email.service';
+export declare class InvoicesService {
+    private readonly invoiceRepository;
+    private readonly companiesService;
+    private readonly partnersService;
+    private readonly ibansService;
+    private readonly emailService;
+    constructor(invoiceRepository: Repository<Invoice>, companiesService: CompaniesService, partnersService: PartnersService, ibansService: IbansService, emailService: EmailService);
+    private extractIban;
+    private importingInvoice;
+    private parseOcrInvoice;
+    private scanningInvoice;
+    createInvoice(user: User, data: CreateInvoiceDto): Promise<Invoice>;
+    updateStatus(id: string, status: InvoiceStatus): Promise<Invoice>;
+    updateInvoice(user: User, id: string, data: any): Promise<Invoice>;
+    findByCompany(company: Company, filters?: any, orderBy?: string, limit?: number, offset?: number): Promise<List>;
+    findOneByIdAndCurrentCompany(id: string, currentCompany: Company): Promise<Invoice>;
+    removeInvoice(user: User, id: string): Promise<Invoice>;
+    generateCode(user: User, invoiceId: string): Promise<Invoice>;
+    checkCode(invoiceId: string, code: string): Promise<Invoice>;
+    invoicesSent(myCompany: Company, targetCompany: Company): Promise<number>;
+    invoicesReceived(myCompany: Company, targetCompany: Company): Promise<number>;
+}

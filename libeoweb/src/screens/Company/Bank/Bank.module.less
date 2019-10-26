@@ -1,0 +1,85 @@
+.table-bank-accounts {
+
+  .actions-bank-account {
+    cursor: pointer;
+    .edit-bank-account,
+    .remove-bank-account {
+     opacity: 0;
+    }
+  }
+
+  tr:hover {
+    cursor: pointer;
+
+    .actions-bank-account {
+      .edit-bank-account,
+      .remove-bank-account {
+        opacity: 0.5;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .edit-bank-account {
+    padding: 10px;
+
+    svg {
+      color: @primary-color;
+    }
+  }
+
+  .remove-bank-account {
+    padding: 10px;
+
+    svg {
+      color: @red;
+    }
+  }
+}
+
+.mandate {
+
+  .row-title {
+    display: block;
+    font-family: @font-bold;
+    font-size: 10px;
+    line-height: 10px;
+    color: @label-color;
+    letter-spacing: 0;
+    margin-bottom: 10px;
+  }
+
+  .row-detail {
+    display: block;
+    font-weight: @font-regular;
+    font-size: 16px;
+    line-height: 16px;
+    color: @default-color;
+    letter-spacing: 0;
+    margin-bottom: 15px;
+  }
+
+  a {
+    color: @primary-color;
+    font-family: @font-bold;
+    font-size: 11px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
+
+  .row-mandate-explain {
+    margin-top: 21px;
+    font-weight: @font-regular;
+    font-size: 10px;
+    color: @default-color;
+  }
+}
+
+.form-provisionning .ant-radio-wrapper {
+  display: block;
+  margin-bottom: 20px;
+}

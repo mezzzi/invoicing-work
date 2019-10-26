@@ -1,0 +1,161 @@
+{
+  "data": {
+    "me": {
+      "id": "4",
+      "firstname": "firstname",
+      "lastname": "lastname",
+      "email": "my.email@libeo.io",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Ik5pY29sYXMubGFiYmUrMUBhZGZhYi5mciIsImlhdCI6MTU1MzE2MzYwOCwiZXhwIjoxNTUzMTY3MjA4fQ.PsHDoCA102BKyb_qpSQLWeftmt5TgsGTytixYf3rajQ",
+      "lastLogin": 1552993987892,
+      "lastCguAccept": 1552993987892,
+      "createdAt": 1552993988137,
+      "updatedAt": 1553163608356,
+      "companies": {
+        "total": 1,
+        "rows": [
+          {
+            "id": "5",
+            "siren": "844679068",
+            "siret": "84467906800016",
+            "name": "LIBEO",
+            "brandName": null,
+            "naf": "62.01Z",
+            "nafNorm": "NAFRev2",
+            "numberEmployees": null,
+            "legalForm": "5710",
+            "category": null,
+            "vatNumber": "FR1844679068",
+            "capital": null,
+            "phone": null,
+            "incorporationAt": 1544054400000,
+            "source": "original",
+            "treezorEmail": "payment.80120bc0-fb5b-49e3-a97f-8c86915052b8@libeo.io",
+            "treezorUserId": 701099,
+            "treezorWalletId": 155247,
+            "treezorIban": "FR7616798000010000015524777",
+            "treezorBic": "TRZOFR21XXX",
+            "createdAt": 1553011034848,
+            "updatedAt": 1553164861876,
+            "status": "SELF",
+            "__typename": "Company"
+          }
+        ],
+        "__typename": "Companies"
+      },
+      "currentCompany": {
+        "kycStatus": null,
+        "kycStep": "IBAN",
+        "id": "5",
+        "siren": "844679068",
+        "siret": "84467906800016",
+        "name": "LIBEO",
+        "brandName": null,
+        "naf": "62.01Z",
+        "nafNorm": "NAFRev2",
+        "numberEmployees": null,
+        "legalForm": "5710",
+        "category": null,
+        "vatNumber": "FR1844679068",
+        "capital": null,
+        "phone": null,
+        "incorporationAt": 1544054400000,
+        "source": "original",
+        "treezorEmail": "payment.80120bc0-fb5b-49e3-a97f-8c86915052b8@libeo.io",
+        "treezorUserId": 701099,
+        "treezorWalletId": 155247,
+        "treezorIban": "FR7616798000010000015524777",
+        "treezorBic": "TRZOFR21XXX",
+        "createdAt": 1553011034848,
+        "updatedAt": 1553164861876,
+        "status": "SELF",
+        "__typename": "Company",
+        "addresses": {
+          "total": 1,
+          "rows": [
+            {
+              "id": "2",
+              "address1": "112 AV DE PARIS",
+              "address2": null,
+              "siret": "84467906800016",
+              "zipcode": 94300,
+              "city": "VINCENNES",
+              "country": "France",
+              "__typename": "Address"
+            }
+          ],
+          "__typename": "Addresses"
+        },
+        "contacts": {
+          "total": 1,
+          "rows": [
+            {
+              "id": "2",
+              "firstname": "firstname 1",
+              "lastname": "lastname 1",
+              "createdAt": 1553164790384,
+              "updatedAt": 1553164793025,
+              "__typename": "Contact",
+              "emails": {
+                "total": 1,
+                "rows": [
+                  {
+                    "id": "2",
+                    "email": "my.email+1@libeo.io",
+                    "createdAt": 1553164790384,
+                    "updatedAt": 1553164793025,
+                    "__typename": "Email"
+                  }
+                ],
+                "__typename": "Emails"
+              }
+            },
+            {
+              "id": "3",
+              "firstname": "firstname 3",
+              "lastname": "lastname 3",
+              "createdAt": 1553164790384,
+              "updatedAt": 1553164793025,
+              "__typename": "Contact",
+              "emails": {
+                "total": 1,
+                "rows": [
+                  {
+                    "id": "3",
+                    "email": "my.email+2@libeo.io",
+                    "createdAt": 1553164790384,
+                    "updatedAt": 1553164793025,
+                    "__typename": "Email"
+                  }
+                ],
+                "__typename": "Emails"
+              }
+            },
+            {
+              "id": "4",
+              "firstname": "firstname 4",
+              "lastname": "lastname 4",
+              "createdAt": 1553164790384,
+              "updatedAt": 1553164793025,
+              "__typename": "Contact",
+              "emails": {
+                "total": 1,
+                "rows": [
+                  {
+                    "id": "4",
+                    "email": "my.email+3@libeo.io",
+                    "createdAt": 1553164790384,
+                    "updatedAt": 1553164793025,
+                    "__typename": "Email"
+                  }
+                ],
+                "__typename": "Emails"
+              }
+            }
+          ],
+          "__typename": "Contacts"
+        }
+      },
+      "__typename": "User"
+    }
+  }
+}

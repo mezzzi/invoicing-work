@@ -1,0 +1,163 @@
+.tag-manager {
+  width: 100%;
+
+  .card-item.ant-card .card-title {
+    font-weight: @font-bold;
+    font-size: 16px;
+    color: @primary-color;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    text-align: left;
+  }
+}
+
+.tag-manager-header {
+
+  &.tag-manager-row {
+    border-bottom: 0;
+
+    .value,
+    .label,
+    .description {
+      font-weight: @font-bold;
+      font-size: 11px;
+      color: @light-color;
+      letter-spacing: 0;
+    }
+  }
+}
+
+.tag-manager-row-add {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  align-self: flex-start;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.tag-manager-row {
+  width: 100%;
+  background: #FFFFFF;
+  border-bottom: 1px solid rgba(0,116,249,0.10);
+
+  &.hidden {
+    display: none;
+  }
+
+  &:last-child {
+    border-bottom: 0px;
+  }
+
+  & > * {
+    height: 100%;
+    min-height: 40px;
+    align-items: center;
+    display: flex;
+  }
+
+  .tag-manager-row-editable {
+
+    .form-item {
+      opacity: 0;
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      left: 0;
+      transform: translate(0, -50%);
+      background: white;
+      padding-right: 10px;
+
+      .ant-input {
+        padding: 0;
+        border: 0;
+      }
+    }
+
+    &.visible {
+
+      .tag-manager-row-value {
+        display: none;
+      }
+
+      .form-item {
+        opacity: 1;
+      }
+    }
+  }
+
+  &.gu-mirror {
+    box-shadow: 0 10px 50px 0 rgba(0,116,249,0.10);
+    opacity: 1;
+  }
+
+  .label,
+  .value,
+  .description {
+    font-weight: @font-semi-bold;
+    font-size: 11px;
+    color: @default-color;
+    letter-spacing: 0;
+    text-align: left;
+    letter-spacing: 0;
+    flex: 1;
+    width: 100%;
+    cursor: text;
+    position: relative;
+
+    .form-item-text .ant-input {
+      font-size: 12px;
+    }
+  }
+
+  &:hover {
+
+    .draggable {
+      opacity: 1;
+    }
+  }
+
+  .drag,
+  .no-drag {
+    color: @light-color;
+    width: 50px;
+  }
+  .drag {
+    cursor: move;
+  }
+
+  .draggable {
+    opacity: 0;
+
+    svg {
+      color: inherit;
+      pointer-events: none;
+      width: 10px;
+      height: 10px;
+      vertical-align: middle;
+    }
+  }
+
+  .remove {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: @default-color;
+    cursor: pointer;
+    width: 50px;
+
+    svg {
+      color: inherit;
+      pointer-events: none;
+      width: 15px;
+      height: 15px;
+      vertical-align: middle;
+    }
+  }
+}

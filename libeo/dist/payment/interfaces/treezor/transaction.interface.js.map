@@ -1,0 +1,1 @@
+{"version":3,"file":"transaction.interface.js","sourceRoot":"","sources":["../../../../src/payment/interfaces/treezor/transaction.interface.ts"],"names":[],"mappings":";;AAEA,IAAY,eAQX;AARD,WAAY,eAAe;IACzB,kCAAwB,CAAA;IACxB,oCAAyB,CAAA;IACzB,wCAA2B,CAAA;IAC3B,oDAAiC,CAAA;IACjC,8CAA8B,CAAA;IAC9B,wCAA2B,CAAA;IAC3B,gCAAuB,CAAA;AACzB,CAAC,EARW,eAAe,GAAf,uBAAe,KAAf,uBAAe,QAQ1B"}

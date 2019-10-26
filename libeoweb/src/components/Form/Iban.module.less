@@ -1,0 +1,43 @@
+.iban-input {
+
+  .copy-btn {
+    background: black;
+    font-weight: @font-bold;
+    font-size: 11px;
+    color: #FFFFFF;
+    letter-spacing: 0;
+    text-align: center;
+    padding: 5px 15px;
+    text-transform: uppercase;
+    cursor: pointer;
+
+    svg {
+      opacity: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-20%, -50%);
+      width: 16px;
+    }
+
+    &.copied {
+      color: black;
+
+      svg {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.iban-wrapper {
+  .ant-form-item-label:before,
+  input {
+    background: @primary-color !important;
+    color: white !important;
+  }
+
+  .ant-form-item-label label {
+    color: white !important;
+  }
+}

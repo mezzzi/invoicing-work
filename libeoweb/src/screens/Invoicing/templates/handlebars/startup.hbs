@@ -1,0 +1,156 @@
+<div class="startup">
+  <div class="header">
+    <div class="pumped-row">
+      <div class="logo">
+        <img style="height:100%" src={{ headerInfo.logoUrl }} />
+      </div>
+    </div>
+    <div class="pumped-row space-between stretch">
+      <div class="info">
+        <h2 class="pumped-h2">{{ emitterCompany.name }}</h2>
+        <p class='pumped-paragraph'>{{ emitterCompany.address1 }}</p>
+        <p class='pumped-paragraph'>{{ emitterCompany.postCode }}-{{ emitterCompany.city }}</p>
+        <p class='pumped-paragraph'>SIRET :{{ emitterCompany.siret }}</p>
+        <p class='pumped-paragraph'>TVA :{{ emitterCompany.vatNumber }}</p>
+      </div>
+      <div class="space-between pumped-col">
+        <div class="pumped-row space-between">
+          <div class="pumped-col">
+            <span>INVOICE TITLE</span>
+            <h1 class="pumped-h1">{{ generalInfo.invoiceTitle }}</h1>
+          </div>
+          <div class="pumped-col span-15">
+            <span>INVOICE NUMBER</span>
+            <h1 class='pumped-h1'>{{ generalInfo.invoiceNumber }}</h1>
+          </div>
+        </div>
+        <div class="pumped-row">
+          <div class="pumped-col">
+            <p class='pumped-paragraph'>Contact: {{ emitterCompany.contactDetails }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='body'>
+    <div class='info'>
+      <div class='pumped-row end customer'>
+        <div class='pumped-col mb-10p span-12'>
+          <span>CUSTOMER</span>
+          <h2 class='pumped-h2'>{{ receiverCompany.name }}</h2>
+          <p class='pumped-paragraph'>{{ receiverCompany.address1 }}</p>
+          <p class='pumped-paragraph'>{{ receiverCompany.postCode }}-{{ receiverCompany.siret }}</p>
+        </div>
+      </div>
+      <div class='pumped-row mb-40p date'>
+        <div class='pumped-col span-6'>
+          <span>INVOICE DATE</span>
+          <h3 class='pumped-h3'>{{ generalInfo.invoiceDate }}</h3>
+        </div>
+        <div class='pumped-col offset-2 span-4'>
+          <span>PAYMENT DUE</span>
+          <h3 class='pumped-h3'>{{ generalInfo.invoiceDueDate }}</h3>
+        </div>
+      </div>
+      <div class='pumped-row'>
+        <div class='pumped-col details'>
+          <span>INVOICE DETAILS</span>
+          <p class='pumped-paragraph'>{{ generalInfo.invoiceDetails }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='items-wrapper'>
+    <div class='pumped-row items-header'>
+      <div class='pumped-col span-6 offset-1'>
+        <h3 class='pumped-h3'>Description</h3>
+      </div>
+      <div class='pumped-col span-2 offset-1'>
+        <h3 class='pumped-h3'>Quantity</h3>
+      </div>
+      <div class='pumped-col span-4 offset-2'>
+        <h3 class='pumped-h3'>Price(in €)</h3>
+      </div>
+      <div class='pumped-col vat span-3 offset-1'>
+        <h3 class="pumped-h3">VAT</H3>
+      </div>
+      <div class='pumped-col span-3 offset-1'>
+        <h3 class='pumped-h3'>Total</h3>
+      </div>
+    </div>
+    {{#each products}}
+    <div class='pumped-row my-item'>
+      <div class='pumped-col span-6 offset-1'>
+        <div class='pumped-col description'>
+          <h3 class='pumped-h3'>{{this.name}}</h3>
+          <span>{{this.description}}</span>
+        </div>
+      </div>
+      <div class='pumped-col span-2 offset-1'>
+        <p class='pumped-paragraph'>{{this.quantity}}</p>
+      </div>
+      <div class='pumped-col span-4 offset-2'>
+        <p class='pumped-paragraph'>{{this.price}}</p>
+      </div>
+      <div class='pumped-col span-3 offset-1 vat'>
+        <p class='pumped-paragraph'>{{this.vatRate}}</p>
+      </div>
+      <div class='pumped-col span-3 offset-1 total'>
+        <p class='pumped-paragraph'>{{multiply this.quantity this.price}} €</p>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</div>
+<div class="calculation">
+  <div class=" pumped-row result-wrapper end">
+    <div class="pumped-col result">
+      <div class="pumped-col single-res">
+        <div class='pumped-row mb-20p op space-between'>
+          <div class="pumped-col">
+            <div>Total VAT({{pricingInfo.vatAllInPercent}}%): </div>
+          </div>
+          <div class="pumped-col">
+            <div>{{pricingInfo.vatAllTotal}}</div>
+          </div>
+        </div>
+        <div class="pumped-row mb-20p op space-between">
+          <div class="pumped-col">
+            <div>Total without VAT: </div>
+          </div>
+          <div class="pumped-col">
+            <div>{{pricingInfo.totalAllWithoutVat}}</div>
+          </div>
+        </div>
+        <div class='pumped-row bl space-between'>
+          <div class="pumped-col">
+            <h2 class="pumped-h2">Total inc. VAT: </h2>
+          </div>
+          <div class="pumped-col">
+            <h2 class="pumped-h2">{{pricingInfo.totalAllWithVat}}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class='footer'>
+  <div class="pumped-col align-middle">
+    {{#if legalNotices.latePaymentPenality}}
+    <p class='pumped-paragraph'>Late Payment Penality</p>
+    {{/if}}
+    {{#if legalNotices.recoveryPenality}}
+    <p class='pumped-paragraph'>Recovery Penality</p>
+    {{/if}}
+    {{#if legalNotices.earlyPaymentCondition}}
+    <p class='pumped-paragraph'>Early Payment Condition</p>
+    {{/if}}
+    {{#if legalNotices.vatExemption}}
+    <p class='pumped-paragraph'>Vat Exemption</p>
+    {{/if}}
+    {{#if legalNotices.displayRIB}}
+    <p class='pumped-paragraph mb-0p'>Company RIB</p>
+    {{/if}}
+  </div>
+</div>
+</div>
