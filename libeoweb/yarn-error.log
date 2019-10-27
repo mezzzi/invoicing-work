@@ -14,8 +14,8 @@ Platform:
   linux x64
 
 Trace: 
-  Error: connect ECONNREFUSED 104.16.23.35:443
-      at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1088:14)
+  Error: getaddrinfo EAI_AGAIN registry.yarnpkg.com registry.yarnpkg.com:443
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:58:26)
 
 npm manifest: 
   {
@@ -23,7 +23,7 @@ npm manifest:
     "version": "0.2.0",
     "private": true,
     "engines": {
-      "node": "11"
+      "node": "10.15.3"
     },
     "dependencies": {
       "@sentry/browser": "4.4.0",
@@ -14159,6 +14159,13 @@ Lockfile:
     dependencies:
       cross-spawn "^5.1.0"
       dotenv "^4.0.0"
+  
+  react-app-rewired@^2.1.4:
+    version "2.1.4"
+    resolved "https://registry.yarnpkg.com/react-app-rewired/-/react-app-rewired-2.1.4.tgz#7d8bb1f6559693f893cadc890d40b540402400cc"
+    integrity sha512-OEd3xWIqk+6HJyi4/uogBphbZqaZXOIv+Mz/DWLZKdzmWdYpXJgeatHcFUjWfj/vsJIDLMI2KaS/FwdAwlkTGw==
+    dependencies:
+      semver "^5.6.0"
   
   react-countup@^4.1.0:
     version "4.1.3"

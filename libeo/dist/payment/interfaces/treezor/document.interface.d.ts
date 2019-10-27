@@ -1,10 +1,10 @@
-import { ITreezor, SortOrder } from './treezor.interface';
+import { ITreezorBasePayload, SortOrder } from './treezor-base-payload.interface';
 export declare enum DocumentStatus {
     PENDING = "PENDING",
     CANCELED = "CANCELED",
     VALIDATED = "VALIDATED"
 }
-export interface IDocumentParams extends ITreezor {
+export interface IDocumentParams extends ITreezorBasePayload {
     documentId?: number;
     documentTag?: string;
     documentStatus?: DocumentStatus;

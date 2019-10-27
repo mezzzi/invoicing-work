@@ -1,5 +1,5 @@
-import { ITreezor, SortOrder } from './treezor.interface';
-export interface IBeneficiaryParams extends ITreezor {
+import { ITreezorBasePayload, SortOrder } from './treezor-base-payload.interface';
+export interface IBeneficiaryParams extends ITreezorBasePayload {
     fields?: string[];
     filter?: string;
     id?: number;
@@ -13,7 +13,7 @@ export interface IBeneficiaryParams extends ITreezor {
     sortBy?: string;
     sortOrder?: SortOrder;
 }
-export interface ICreateBeneficiaryParams extends ITreezor {
+export interface ICreateBeneficiaryParams extends ITreezorBasePayload {
     body: {
         tag?: string;
         userId: number;

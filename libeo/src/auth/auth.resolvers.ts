@@ -41,9 +41,9 @@ export class AuthResolvers {
     delete input.cgu;
     user = await this.usersService.createUser(input);
 
-    const baseUrl = (ctx.req.headers && ctx.req.headers.origin) ? ctx.req.headers.origin : null;
-    this.usersService.confirmationToken(user, baseUrl);
-    await this.supportService.createTicketNewUser(user);
+    // const baseUrl = (ctx.req.headers && ctx.req.headers.origin) ? ctx.req.headers.origin : null;
+    // this.usersService.confirmationToken(user, baseUrl);
+    // await this.supportService.createTicketNewUser(user);
 
     return user;
   }

@@ -10,8 +10,8 @@ export declare class User extends BaseEntity {
     password: string;
     enabled: boolean;
     blocked: boolean;
-    confirmationToken: string;
-    confirmationPasswordToken: string;
+    emailConfirmationToken: string;
+    passwordConfirmationToken: string;
     token: string;
     lastCguAccept: Date;
     lastLogin: Date;

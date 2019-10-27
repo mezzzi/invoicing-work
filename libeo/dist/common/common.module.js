@@ -57,7 +57,6 @@ const export_entity_1 = require("./entities/export.entity");
 const accounting_entry_entity_1 = require("./entities/accounting-entry.entity");
 const exports_resolvers_1 = require("./resolvers/exports.resolvers");
 const ibans_resolvers_1 = require("./resolvers/ibans.resolvers");
-const sendgrid_controller_1 = require("./controllers/sendgrid.controller");
 const bank_accounts_resolvers_1 = require("./resolvers/bank-accounts.resolvers");
 const bank_account_service_1 = require("./services/bank-account.service");
 const bank_account_entity_1 = require("./entities/bank-account.entity");
@@ -67,6 +66,12 @@ const mandates_service_1 = require("./services/mandates.service");
 const mandate_repository_1 = require("./repositories/mandate.repository");
 const notification_module_1 = require("../notification/notification.module");
 const siren_module_1 = require("../siren/siren.module");
+const payment_module_1 = require("../payment/payment.module");
+const payments_workflow_1 = require("./workflow/payments.workflow");
+const payins_service_1 = require("./services/payins.service");
+const payin_entity_1 = require("./entities/payin.entity");
+const storage_module_1 = require("../storage/storage.module");
+const treezor_payout_workflow_1 = require("./workflow/treezor-payout.workflow");
 let CommonModule = class CommonModule {
 };
 CommonModule = __decorate([
@@ -90,12 +95,15 @@ CommonModule = __decorate([
                 accounting_entry_entity_1.AccountingEntry,
                 bank_account_entity_1.BankAccount,
                 mandate_entity_1.Mandate,
+                payin_entity_1.Payin,
                 payment_repository_1.PaymentRepository,
                 accounting_entry_repository_1.AccountingEntryRepository,
                 mandate_repository_1.MandateRepository,
             ]),
             notification_module_1.NotificationModule,
-            siren_module_1.SirenModule
+            siren_module_1.SirenModule,
+            payment_module_1.PaymentModule,
+            storage_module_1.StorageModule,
         ],
         providers: [
             date_scalar_1.DateScalar,
@@ -133,10 +141,13 @@ CommonModule = __decorate([
             exports_service_1.ExportsService,
             bank_account_service_1.BankAccountService,
             mandates_service_1.MandatesService,
+            payins_service_1.PayinsService,
+            common_1.Logger,
+            payments_workflow_1.PaymentsWorkflow,
+            treezor_payout_workflow_1.TreezorPayoutWorkflow
         ],
         controllers: [
             treezor_controller_1.TreezorController,
-            sendgrid_controller_1.SendgridController,
         ],
     })
 ], CommonModule);

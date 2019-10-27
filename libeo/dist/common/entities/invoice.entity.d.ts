@@ -10,6 +10,7 @@ export declare enum InvoiceStatus {
     SCANNED = "SCANNED",
     TO_PAY = "TO_PAY",
     PLANNED = "PLANNED",
+    AR_DRAFT = "AR_DRAFT",
     PAID = "PAID"
 }
 export declare enum InvoiceExtension {
@@ -51,4 +52,17 @@ export declare class Invoice extends BaseEntity {
     purchaseAccount: AccountingPreference;
     createdAt: Date;
     updatedAt: Date;
+    companyEmitterId: string;
+    companyEmitterDetails: any;
+    companyEmitterContactDetails: any;
+    companyReceiverId: string;
+    companyReceiverDetails: any;
+    documentType: string;
+    invoiceDescription: string;
+    discount: number;
+    templateId: number;
+    displayLegalNotice: any;
+    products: any;
+    arCreatedById: string;
+    source: string;
 }

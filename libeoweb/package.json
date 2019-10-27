@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "engines": {
-    "node": "11"
+    "node": "10.15.3"
   },
   "dependencies": {
     "@sentry/browser": "4.4.0",

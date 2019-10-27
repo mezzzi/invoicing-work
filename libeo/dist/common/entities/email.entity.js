@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const contact_entity_1 = require("./contact.entity");
 const encrypt_value_transformer_1 = require("../value-transformer/encrypt.value-transformer");
+const lowercase_value_transformer_1 = require("../value-transformer/lowercase.value-transformer");
 let Email = class Email extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -19,7 +20,7 @@ __decorate([
     __metadata("design:type", String)
 ], Email.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column({ transformer: encrypt_value_transformer_1.encrypt, length: 80 }),
+    typeorm_1.Column({ transformer: [lowercase_value_transformer_1.lowercase, encrypt_value_transformer_1.encrypt], length: 80 }),
     __metadata("design:type", String)
 ], Email.prototype, "email", void 0);
 __decorate([

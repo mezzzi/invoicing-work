@@ -18,7 +18,6 @@
   },
   "workspaces": {
     "packages": [
-      "libeoweb",
       "libeo"
     ],
     "nohoist": [
@@ -29,6 +28,7 @@
     ]
   },
   "dependencies": {
-    "react-app-rewire-react-svg-loader": "^1.0.1"
+    "react-app-rewire-react-svg-loader": "^1.0.1",
+    "react-app-rewired": "^2.1.4"
   }
 }

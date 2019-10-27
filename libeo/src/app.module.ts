@@ -17,7 +17,7 @@ const getConnectionOptions = () => {
       type: 'sqljs',
       dropSchema: true,
       location: resolve(__dirname, '../e2e', 'libeo.db'),
-      namingStrategy: new CamelNamingStrategy(),
+      namingStrategy: new CamelNamingStrategy()
     };
   }
   return {
@@ -27,7 +27,7 @@ const getConnectionOptions = () => {
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
-    namingStrategy: new SnakeNamingStrategy(),
+    namingStrategy: new SnakeNamingStrategy()
   };
 };
 
@@ -39,30 +39,30 @@ const getConnectionOptions = () => {
       useFactory: (config: ConfigService) => {
         const connectionOptions = getConnectionOptions();
         const defaultConnectionOptions = {
-          logging: (process.env.TYPEORM_LOGGING === 'true'),
+          logging: process.env.TYPEORM_LOGGING === 'true',
           entities: [resolve(__dirname, '**/*.entity{.ts,.js}')],
           subscribers: [resolve(__dirname, '**/*.subscriber{.ts,.js}')],
-          synchronize: (process.env.TYPEORM_SYNCHRONIZE === 'true'),
+          synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true'
         };
 
         return Object.assign(defaultConnectionOptions, connectionOptions);
       },
-      inject: [ConfigService],
+      inject: [ConfigService]
     }),
     GraphQLModule.forRootAsync({
       useFactory: (config: ConfigService) => config.get('graphql'),
-      inject: [ConfigService],
+      inject: [ConfigService]
     }),
     CommonModule,
-    NotificationModule,
-    AuthModule,
+    // NotificationModule,
+    AuthModule
   ],
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useValue: new RavenInterceptor(),
-    },
-  ],
+      useValue: new RavenInterceptor()
+    }
+  ]
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

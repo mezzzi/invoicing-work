@@ -20,7 +20,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Zendesk = require("zendesk-node-api");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const payment_entity_1 = require("../entities/payment.entity");
@@ -33,18 +32,23 @@ const nest_schedule_1 = require("nest-schedule");
 const payment_repository_1 = require("../repositories/payment.repository");
 const typeorm_2 = require("typeorm");
 const contacts_service_1 = require("./contacts.service");
-const constants_1 = require("../../constants");
 const payment_notification_entity_1 = require("../entities/payment-notification.entity");
+const payments_workflow_1 = require("../workflow/payments.workflow");
+const zendesk_service_1 = require("../../notification/zendesk.service");
+const zendesk_ticket_interface_1 = require("../../notification/interface/zendesk-ticket.interface");
+const payin_entity_1 = require("../entities/payin.entity");
 let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule {
-    constructor(paymentRepository, invoiceRepository, companyRepository, paymentNotificationRepository, invoicesService, balancesService, contactsService) {
+    constructor(paymentRepository, invoiceRepository, paymentNotificationRepository, invoicesService, balancesService, contactsService, treezorService, paymentsWorkflow, zendeskService) {
         super();
         this.paymentRepository = paymentRepository;
         this.invoiceRepository = invoiceRepository;
-        this.companyRepository = companyRepository;
         this.paymentNotificationRepository = paymentNotificationRepository;
         this.invoicesService = invoicesService;
         this.balancesService = balancesService;
         this.contactsService = contactsService;
+        this.treezorService = treezorService;
+        this.paymentsWorkflow = paymentsWorkflow;
+        this.zendeskService = zendeskService;
     }
     payoutContacts(user, invoiceId, contactIds) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -56,7 +60,6 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
             if (contacts.length === 0) {
                 return false;
             }
-            const To = [];
             yield Promise.all(contacts.map((contact) => __awaiter(this, void 0, void 0, function* () {
                 const paymentNotification = this.paymentNotificationRepository.create({
                     contact,
@@ -95,23 +98,24 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
                 payment.save(),
                 invoice.save(),
             ]);
-            this.updateLibeoBalance(invoice.companyReceiver, payment);
+            yield this.updateLibeoBalance(invoice.companyReceiver, payment);
             if (invoice.iban && !invoice.iban.treezorBeneficiaryId) {
                 yield this.createBeneficiary(user, invoice, payment);
             }
-            return invoice;
+            const invoices = yield this.invoiceRepository
+                .find({
+                where: {
+                    companyReceiver: user.currentCompany,
+                    status: typeorm_2.In([invoice_entity_1.InvoiceStatus.TO_PAY, invoice_entity_1.InvoiceStatus.PLANNED])
+                }
+            });
+            return invoices;
         });
     }
     createBeneficiary(user, invoice, payment) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-                userId: invoice.companyEmitter.treezorUserId,
-            });
             try {
-                const beneficiary = yield treezor.createBeneficiary({
+                const beneficiary = yield this.treezorService.createBeneficiary({
                     body: {
                         tag: invoice.iban.id,
                         userId: invoice.companyReceiver.treezorUserId,
@@ -139,18 +143,12 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
                     payment.cancellationRequestUser = null;
                     try {
                         yield Promise.all([invoice.save(), payment.save()]);
-                        const zendesk = new Zendesk({
-                            url: process.env.ZENDESK_API_URL,
-                            email: process.env.ZENDESK_API_EMAIL,
-                            token: process.env.ZENDESK_API_TOKEN,
-                        });
-                        zendesk.tickets.create({
-                            type: 'problem',
-                            priority: 'high',
+                        yield this.zendeskService.createTicket({
+                            type: zendesk_ticket_interface_1.ZendeskTicketType.PROBLEM,
+                            priority: zendesk_ticket_interface_1.ZendesTicketPriority.HIGH,
                             requester: { name: user.fullName || null, email: user.email || null },
                             subject: 'IBAN non valide',
                             comment: { body: `L'IBAN renseigné par l'entreprise ${invoice.companyReceiver.name || invoice.companyReceiver.brandName || ''} est invalide. Le bénéficiaire n'a pas pu être créé chez Treezor, la facture et le paiement associé sont donc annulés : \n* Iban ID : ${invoice.iban.id}\n* Payement ID : ${payment.id}\n* Invoice ID ${invoice.id}` },
-                            custom_fields: [constants_1.environmentZendesk],
                         });
                         throw new common_1.HttpException('api.error.invoice.iban', common_1.HttpStatus.BAD_REQUEST);
                     }
@@ -188,6 +186,9 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
                 this.balancesService.getBalance(company),
                 this.paymentRepository.getPlannedPayments(company, (currentPayment) ? currentPayment.paymentAt : null),
             ]);
+            if (!balance) {
+                return;
+            }
             let calculationLibeoBalance = Number(balance.authorizedBalance);
             if (currentPayment) {
                 calculationLibeoBalance = yield this.balancesService.calculationLibeoBalance(balance, currentPayment.paymentAt, company);
@@ -213,13 +214,8 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
     }
     checkBeneficiary(beneficiaryId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                const beneficiary = yield treezor.getBeneficiary(beneficiaryId);
+                const beneficiary = yield this.treezorService.getBeneficiary(beneficiaryId);
                 if (beneficiary) {
                     return true;
                 }
@@ -233,74 +229,14 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
     deferredPayments() {
         return __awaiter(this, void 0, void 0, function* () {
             const logger = new common_1.Logger();
-            const payments = yield this.paymentRepository.getDeferredPayments([
-                payment_entity_1.PaymentStatus.REQUESTED,
-                payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE,
-                payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC,
-                payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE,
-                payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC,
-            ]);
-            logger.log(`${payments.length} deferred payments`);
+            const payments = yield this.paymentRepository.getDeferredPayments();
             if (payments.length === 0) {
                 return;
             }
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
-            yield Promise.all(payments.map((payment) => __awaiter(this, void 0, void 0, function* () {
-                payment.status = payment_entity_1.PaymentStatus.SENT_TO_TREEZOR;
-                try {
-                    yield payment.save();
-                }
-                catch (err) {
-                    logger.error(err.message);
-                }
-                try {
-                    const payout = yield treezor.createPayout({
-                        beneficiaryId: payment.treezorBeneficiaryId,
-                        amount: payment.invoice.total,
-                        currency: payment.invoice.currency,
-                        walletId: payment.invoice.companyReceiver.treezorWalletId,
-                        payoutTag: payment.id,
-                        label: payment.invoice.companyReceiver.name || payment.invoice.companyReceiver.brandName || '',
-                        supportingFileLink: (payment.amount > 2000) ? payment.invoice.filepath : '',
-                    });
-                    payment.treezorPayoutId = payout.payoutId;
-                    payment.treezorRequestAt = new Date();
-                    payment.status = payment_entity_1.PaymentStatus.TREEZOR_PENDING;
-                    yield payment.save();
-                    logger.log(`Payment ${payment.id} passed`);
-                }
-                catch (err) {
-                    logger.error(err.message);
-                    if (err.code === 16018) {
-                        payment.status = payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE;
-                    }
-                    else {
-                        payment.status = payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC;
-                    }
-                    payment.treezorRequestAt = new Date();
-                    yield payment.save();
-                    yield this.updateLibeoBalance(payment.invoice.companyReceiver, payment);
-                    const companyReceiver = yield this.companyRepository.findOne({ where: { id: payment.invoice.companyReceiver.id }, relations: ['claimer'] });
-                    const claimer = companyReceiver.claimer;
-                    const zendesk = new Zendesk({
-                        url: process.env.ZENDESK_API_URL,
-                        email: process.env.ZENDESK_API_EMAIL,
-                        token: process.env.ZENDESK_API_TOKEN,
-                    });
-                    zendesk.tickets.create({
-                        type: 'incident',
-                        priority: 'urgent',
-                        requester: { name: claimer.fullName || null, email: claimer.email || null },
-                        subject: 'Paiement en erreur',
-                        comment: { body: `Le paiement ${payment.id} est retourné en erreur par treezor et demande une investiguation.\nLe paiement sera retenté automatiquement.\nMessage d'erreur : ${err.message}` },
-                        custom_fields: [constants_1.environmentZendesk],
-                    });
-                }
-            })));
+            else {
+                logger.log(`${payments.length} deferred payments`);
+            }
+            yield Promise.all(payments.map(this.paymentsWorkflow.processPayment));
         });
     }
     updateInvoiceStatus(id, status, user) {
@@ -314,30 +250,41 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
             }
             if (status === invoice_entity_1.InvoiceStatus.TO_PAY && invoice.status === invoice_entity_1.InvoiceStatus.PLANNED) {
                 const payments = yield this.paymentRepository.find({
-                    invoice,
-                    status: typeorm_2.In([
-                        payment_entity_1.PaymentStatus.REQUESTED,
-                        payment_entity_1.PaymentStatus.SENT_TO_TREEZOR,
-                        payment_entity_1.PaymentStatus.TREEZOR_PENDING,
-                        payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE,
-                        payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC,
-                        payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC,
-                        payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE,
-                    ]),
+                    where: {
+                        invoice,
+                        status: typeorm_2.In([
+                            payment_entity_1.PaymentStatus.REQUESTED,
+                            payment_entity_1.PaymentStatus.BEING_PROCESSED,
+                            payment_entity_1.PaymentStatus.TREEZOR_PENDING,
+                            payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE,
+                            payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC,
+                            payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC,
+                            payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE,
+                        ]),
+                    },
+                    relations: ['payin'],
                 });
                 const promises = payments.map((payment) => __awaiter(this, void 0, void 0, function* () {
                     payment.status = payment_entity_1.PaymentStatus.CANCELLED;
                     payment.cancellationRequestAt = new Date();
                     payment.cancellationRequestUser = user;
                     yield payment.save();
+                    if (payment.payin) {
+                        const payin = payment.payin;
+                        payin.status = payin_entity_1.PayinStatus.CANCELLED;
+                        yield payin.save();
+                        if (payin.treezorPayinId) {
+                            try {
+                                yield this.treezorService.deletePayin(payin.treezorPayinId);
+                            }
+                            catch (err) {
+                                throw new common_1.HttpException(err.message, err.statusCode);
+                            }
+                        }
+                    }
                     if (payment.treezorPayoutId) {
-                        const treezor = new treezor_service_1.TreezorService({
-                            baseUrl: process.env.TREEZOR_API_URL,
-                            token: process.env.TREEZOR_TOKEN,
-                            secretKey: process.env.TREEZOR_SECRET_KEY,
-                        });
                         try {
-                            yield treezor.deletePayout(payment.treezorPayoutId);
+                            yield this.treezorService.deletePayout(payment.treezorPayoutId);
                         }
                         catch (err) {
                             throw new common_1.HttpException(err.message, err.statusCode);
@@ -345,7 +292,7 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
                     }
                 }));
                 yield Promise.all(promises);
-                this.updateLibeoBalance(invoice.companyReceiver);
+                yield this.updateLibeoBalance(invoice.companyReceiver);
             }
             if (status === invoice_entity_1.InvoiceStatus.SCANNED && invoice.status === invoice_entity_1.InvoiceStatus.TO_PAY) {
                 invoice.code = null;
@@ -354,7 +301,17 @@ let PaymentsService = class PaymentsService extends nest_schedule_1.NestSchedule
             }
             invoice.status = status;
             yield invoice.save();
-            return invoice;
+            if (status === invoice_entity_1.InvoiceStatus.TO_PAY) {
+                const invoices = yield this.invoiceRepository
+                    .find({
+                    where: {
+                        companyReceiver: user.currentCompany,
+                        status: typeorm_2.In([invoice_entity_1.InvoiceStatus.PLANNED])
+                    }
+                });
+                return invoices.concat(invoice);
+            }
+            return [invoice];
         });
     }
 };
@@ -368,15 +325,16 @@ PaymentsService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(payment_repository_1.PaymentRepository)),
     __param(1, typeorm_1.InjectRepository(invoice_entity_1.Invoice)),
-    __param(2, typeorm_1.InjectRepository(company_entity_1.Company)),
-    __param(3, typeorm_1.InjectRepository(payment_notification_entity_1.PaymentNotification)),
+    __param(2, typeorm_1.InjectRepository(payment_notification_entity_1.PaymentNotification)),
     __metadata("design:paramtypes", [payment_repository_1.PaymentRepository,
-        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         invoices_service_1.InvoicesService,
         balances_service_1.BalancesService,
-        contacts_service_1.ContactsService])
+        contacts_service_1.ContactsService,
+        treezor_service_1.TreezorService,
+        payments_workflow_1.PaymentsWorkflow,
+        zendesk_service_1.ZendeskService])
 ], PaymentsService);
 exports.PaymentsService = PaymentsService;
 //# sourceMappingURL=payments.service.js.map

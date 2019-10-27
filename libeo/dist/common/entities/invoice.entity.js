@@ -22,6 +22,7 @@ var InvoiceStatus;
     InvoiceStatus["SCANNED"] = "SCANNED";
     InvoiceStatus["TO_PAY"] = "TO_PAY";
     InvoiceStatus["PLANNED"] = "PLANNED";
+    InvoiceStatus["AR_DRAFT"] = "AR_DRAFT";
     InvoiceStatus["PAID"] = "PAID";
 })(InvoiceStatus = exports.InvoiceStatus || (exports.InvoiceStatus = {}));
 var InvoiceExtension;
@@ -160,6 +161,58 @@ __decorate([
     typeorm_1.UpdateDateColumn(),
     __metadata("design:type", Date)
 ], Invoice.prototype, "updatedAt", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Invoice.prototype, "companyEmitterId", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'simple-json', nullable: true }),
+    __metadata("design:type", Object)
+], Invoice.prototype, "companyEmitterDetails", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'simple-json', nullable: true }),
+    __metadata("design:type", Object)
+], Invoice.prototype, "companyEmitterContactDetails", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Invoice.prototype, "companyReceiverId", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'simple-json', nullable: true }),
+    __metadata("design:type", Object)
+], Invoice.prototype, "companyReceiverDetails", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Invoice.prototype, "documentType", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Invoice.prototype, "invoiceDescription", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true, type: 'double precision' }),
+    __metadata("design:type", Number)
+], Invoice.prototype, "discount", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Invoice.prototype, "templateId", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'simple-json', nullable: true }),
+    __metadata("design:type", Object)
+], Invoice.prototype, "displayLegalNotice", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'simple-json', nullable: true }),
+    __metadata("design:type", Object)
+], Invoice.prototype, "products", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Invoice.prototype, "arCreatedById", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Invoice.prototype, "source", void 0);
 Invoice = __decorate([
     typeorm_1.Entity()
 ], Invoice);

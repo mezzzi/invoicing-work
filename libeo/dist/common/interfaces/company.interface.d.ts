@@ -15,4 +15,5 @@ export interface IComplementaryInfos {
     numberEmployees: string;
     legalNetIncomeRange: string;
     phone: string;
+    addresses?: object;
 }

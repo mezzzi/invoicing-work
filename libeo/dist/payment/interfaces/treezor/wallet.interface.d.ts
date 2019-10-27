@@ -1,5 +1,5 @@
-import { ITreezor } from './treezor.interface';
-export interface ICreateWalletParams extends ITreezor {
+import { ITreezorBasePayload } from './treezor-base-payload.interface';
+export interface ICreateWalletParams extends ITreezorBasePayload {
     walletTypeId: WalletType;
     tariffId: number;
     userId: number;

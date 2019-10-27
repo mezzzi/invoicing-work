@@ -1,5 +1,5 @@
-import { ITreezor, SortOrder } from './treezor.interface';
-export interface ICreateUserParams extends ITreezor {
+import { ITreezorBasePayload, SortOrder } from './treezor-base-payload.interface';
+export interface ICreateUserParams extends ITreezorBasePayload {
     userTypeId: UserType;
     userTag?: string;
     parentUserId?: number;
@@ -44,7 +44,7 @@ export interface ICreateUserParams extends ITreezor {
     position?: string;
     personalAssets?: string;
 }
-export interface IUpdateUserParams extends ITreezor {
+export interface IUpdateUserParams extends ITreezorBasePayload {
     userId: number;
     userTypeId: UserType;
     userTag?: string;
@@ -90,7 +90,7 @@ export interface IUpdateUserParams extends ITreezor {
     position?: string;
     personalAssets?: string;
 }
-export interface IUserParams extends ITreezor {
+export interface IUserParams extends ITreezorBasePayload {
     userId?: number;
     userTypeId?: number;
     userStatus?: string;

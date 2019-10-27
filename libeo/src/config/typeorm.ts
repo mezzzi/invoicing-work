@@ -14,7 +14,7 @@ const typeOrmConfig: ConnectionOptions = {
   entities: [resolve(__dirname, '**/*.entity{.ts,.js}')],
   subscribers: [resolve(__dirname, '**/*.subscriber{.ts,.js}')],
   namingStrategy: new SnakeNamingStrategy(),
-  synchronize: true,
+  synchronize: true
 };
 
 export default typeOrmConfig;

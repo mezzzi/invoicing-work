@@ -1,8 +1,8 @@
-import { Row } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
-import { Select, SelectOption } from 'components/Invoicing/Form';
-import * as React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { Row } from "antd";
+import { FormComponentProps } from "antd/lib/form";
+import { Select, SelectOption } from "components/Invoicing/Form";
+import * as React from "react";
+import { FormattedMessage } from "react-intl";
 
 interface IProps extends FormComponentProps {
   id: string;
@@ -13,7 +13,7 @@ interface IProps extends FormComponentProps {
   defaultValue?: any;
   onChangeSelect?: (
     value: any,
-    option: React.ReactElement<any> | Array<React.ReactElement<any>>,
+    option: React.ReactElement<any> | Array<React.ReactElement<any>>
   ) => void;
 }
 
@@ -29,10 +29,10 @@ class SelectBox extends React.PureComponent<IProps, IState> {
       options,
       id,
       onChangeSelect,
-      partnerIds = [],
+      partnerIds = []
     } = this.props;
 
-    const choices = options || ['a', 'b', 'c', 'd', 'e'];
+    const choices = options || ["a", "b", "c", "d", "e"];
     return (
       <div className="invoicing-select">
         <div className="invoicing-element-title">{title}</div>

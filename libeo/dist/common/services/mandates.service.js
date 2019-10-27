@@ -33,11 +33,12 @@ const address_entity_1 = require("../entities/address.entity");
 const mandate_repository_1 = require("../repositories/mandate.repository");
 const email_service_1 = require("../../notification/email.service");
 let MandatesService = class MandatesService {
-    constructor(mandateRepository, bankAccountRepository, addressRepository, emailService) {
+    constructor(mandateRepository, bankAccountRepository, addressRepository, emailService, treezorService) {
         this.mandateRepository = mandateRepository;
         this.bankAccountRepository = bankAccountRepository;
         this.addressRepository = addressRepository;
         this.emailService = emailService;
+        this.treezorService = treezorService;
     }
     createMandate(user, bankAccountId, ip) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,11 +50,6 @@ let MandatesService = class MandatesService {
             if (!bankAccount) {
                 throw new common_1.HttpException('api.error.bank_account.not_found', common_1.HttpStatus.NOT_FOUND);
             }
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             let defaultAddress = null;
             if (company.addresses && company.addresses.length > 0) {
                 defaultAddress = company.addresses[0];
@@ -74,7 +70,6 @@ let MandatesService = class MandatesService {
             const params = {
                 sddType: mandate_interface_1.MandateSddType.CORE,
                 isPaper: true,
-                userId: process.env.TREEZOR_ACCOUNT_LIBEO,
                 debtorName: company.name || company.brandName || '',
                 debtorAddress,
                 debtorCity: (defaultAddress) ? defaultAddress.city : '',
@@ -87,7 +82,7 @@ let MandatesService = class MandatesService {
                 signatureDate: moment().format('YYYY-MM-DD'),
             };
             try {
-                treezorMandate = yield treezor.createMandate(params);
+                treezorMandate = yield this.treezorService.createMandate(params);
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, err.statusCode);
@@ -137,7 +132,7 @@ let MandatesService = class MandatesService {
                     mandateRum: mandate.rum,
                 },
             };
-            this.emailService.send([message]);
+            yield this.emailService.send([message]);
             return mandate;
         });
     }
@@ -175,7 +170,7 @@ let MandatesService = class MandatesService {
                     mandateSignatureCode: code,
                 },
             };
-            this.emailService.send([message]);
+            yield this.emailService.send([message]);
             return mandate;
         });
     }
@@ -194,13 +189,8 @@ let MandatesService = class MandatesService {
             if (mandate.status !== mandate_entity_1.MandateStatus.SIGNED) {
                 throw new common_1.HttpException('api.error.mandate.invalid_status', common_1.HttpStatus.BAD_REQUEST);
             }
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                yield treezor.deleteMandate({ mandateId: mandate.treezorMandateId, origin: mandate_interface_1.MandateOrigin.CREDITOR });
+                yield this.treezorService.deleteMandate({ mandateId: mandate.treezorMandateId, origin: mandate_interface_1.MandateOrigin.CREDITOR });
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, err.statusCode);
@@ -219,7 +209,8 @@ MandatesService = __decorate([
     __metadata("design:paramtypes", [mandate_repository_1.MandateRepository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        email_service_1.EmailService])
+        email_service_1.EmailService,
+        treezor_service_1.TreezorService])
 ], MandatesService);
 exports.MandatesService = MandatesService;
 //# sourceMappingURL=mandates.service.js.map

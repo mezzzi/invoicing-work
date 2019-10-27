@@ -5,7 +5,5 @@ export declare class WebhooksService {
     private readonly webhookRepository;
     constructor(webhookRepository: Repository<Webhook>);
     private snakeToCamel;
-    private compareSignature;
     createWebhook(data: IWebhook): Promise<Webhook>;
-    updateWebhook(where: any, data: IWebhook): Promise<Webhook>;
 }

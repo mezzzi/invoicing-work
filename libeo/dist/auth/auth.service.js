@@ -34,10 +34,10 @@ let AuthService = class AuthService {
             if (!user) {
                 throw new common_1.HttpException('api.error.unauthorized', common_1.HttpStatus.UNAUTHORIZED);
             }
-            if (user.enabled === false && !user.confirmationToken) {
+            if (user.enabled === false && !user.emailConfirmationToken) {
                 throw new common_1.HttpException('api.error.user.disabled', common_1.HttpStatus.UNAUTHORIZED);
             }
-            if (user.enabled === false && user.confirmationToken) {
+            if (user.enabled === false && user.emailConfirmationToken) {
                 throw new common_1.HttpException('api.error.user.not_activated', common_1.HttpStatus.UNAUTHORIZED);
             }
             if (user.blocked === true) {

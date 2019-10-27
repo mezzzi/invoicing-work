@@ -1,5 +1,3 @@
-import { ITreezorConfig } from './interfaces/treezor/config.interface';
-import { IStrategy } from './interfaces/strategy.interface';
 import { ICreateWalletParams } from './interfaces/treezor/wallet.interface';
 import { ICreateUserParams, IUpdateUserParams, IUserParams, IUser } from './interfaces/treezor/user.interface';
 import { IBalanceParams } from './interfaces/treezor/balance.interface';
@@ -8,11 +6,15 @@ import { IBusinessParams, IBusinesses, ISearchParams, ISearch } from './interfac
 import { IDocumentParams, IDocuments, IDocument } from './interfaces/treezor/document.interface';
 import { ICreateBeneficiaryParams, IBeneficiary } from './interfaces/treezor/beneficiary.interface';
 import { ICreatePayoutParams, IPayout } from './interfaces/treezor/payout.interface';
+import { TreezorAPI } from './treezor.api';
 import { ICreateTaxResidenceParams, ITaxResidence, IUpdateTaxResidenceParams } from './interfaces/treezor/taxresidence.interface';
 import { ICreateMandateParams, IMandate, IDeleteMandateParams } from './interfaces/treezor/mandate.interface';
-export declare class TreezorService implements IStrategy {
-    private readonly utils;
-    constructor(config: ITreezorConfig);
+import { ICreatePayinParams, ITreezorPayin } from './interfaces/treezor/payin.interface';
+import { ConfigService } from 'nestjs-config';
+export declare class TreezorService {
+    private readonly treezorApi;
+    private readonly config;
+    constructor(treezorApi: TreezorAPI, configService: ConfigService);
     createUser(data: ICreateUserParams): Promise<any>;
     updateUser(data: IUpdateUserParams): Promise<any>;
     removeUser(data: any): Promise<IUser>;
@@ -23,6 +25,8 @@ export declare class TreezorService implements IStrategy {
     createBeneficiary(data: ICreateBeneficiaryParams): Promise<IBeneficiary>;
     createPayout(data: ICreatePayoutParams): Promise<IPayout>;
     deletePayout(payoutId: number): Promise<any>;
+    createPayin(data: ICreatePayinParams): Promise<ITreezorPayin>;
+    deletePayin(payinId: number): Promise<any>;
     deleteDocument(documentId: number): Promise<IDocument>;
     getTransactions(params: ITransactionParams): Promise<any>;
     getBalances(params: IBalanceParams): Promise<any>;

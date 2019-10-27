@@ -22,6 +22,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastcsv = require("fast-csv");
 const fs = require("fs");
+const uuid = require("uuid");
 const path = require("path");
 const moment = require("moment");
 const typeorm_1 = require("typeorm");
@@ -30,30 +31,21 @@ const typeorm_2 = require("@nestjs/typeorm");
 const export_entity_1 = require("../entities/export.entity");
 const accounting_entry_entity_1 = require("../entities/accounting-entry.entity");
 const accounting_entry_repository_1 = require("../repositories/accounting-entry.repository");
+const export_storage_service_1 = require("../../storage/export-storage.service");
 let ExportsService = class ExportsService {
-    constructor(exportRepository, accountingEntryRepository) {
+    constructor(exportRepository, accountingEntryRepository, exportStorageService) {
         this.exportRepository = exportRepository;
         this.accountingEntryRepository = accountingEntryRepository;
+        this.exportStorageService = exportStorageService;
     }
     generate(company) {
         return __awaiter(this, void 0, void 0, function* () {
-            const accountingEntries = yield this.accountingEntryRepository.findByCompanyAndExportIdEmpty(company);
-            const destinationDirectory = path.resolve(__dirname, '../../../public/static', `companies/${company.id}/exports`);
-            const filePath = `companies/${company.id}/exports/export-${new Date().getTime()}.csv`;
-            if (!fs.existsSync(destinationDirectory)) {
-                fs.mkdirSync(destinationDirectory, { recursive: true });
+            if (!company) {
+                throw new common_1.NotFoundException('api.error.company.not_found');
             }
-            const headers = [
-                'Date',
-                'Code journal',
-                'Libellé journal',
-                'Code compte',
-                'Label écriture',
-                'Ref écriture',
-                'Sens',
-                'Montant',
-                'Devise',
-            ];
+            const fileName = `export-${uuid.v4()}.csv`;
+            const headers = ['Date', 'Code journal', 'Libellé journal', 'Code compte', 'Label écriture', 'Ref écriture', 'Sens', 'Montant', 'Devise'];
+            const accountingEntries = yield this.accountingEntryRepository.findByCompanyAndExportIdEmpty(company);
             const data = accountingEntries.map(entry => {
                 return [
                     moment(entry.entryDate).format('DD/MM/YYYY'),
@@ -71,20 +63,31 @@ let ExportsService = class ExportsService {
             try {
                 yield new Promise((resolve, reject) => {
                     fastcsv
-                        .writeToPath(path.resolve(__dirname, '../../../public/static', filePath), data, { headers: true })
+                        .writeToPath(path.resolve(fileName), data, { headers: true })
                         .on('error', reject)
                         .on('finish', resolve);
                 });
             }
             catch (err) {
-                throw new common_1.HttpException('api.error.export.generate', common_1.HttpStatus.BAD_REQUEST);
+                throw new common_1.BadRequestException('api.error.export.generate');
             }
-            yield this.exportRepository.save(this.exportRepository.create({
-                company,
-                enabled: true,
-                fileLink: filePath,
-            }));
-            return filePath;
+            try {
+                const createReadStream = () => {
+                    return fs.createReadStream(fileName);
+                };
+                const file = { createReadStream, filename: fileName, mimetype: 'text/csv', encoding: null };
+                const { fileLocation } = yield this.exportStorageService.upload(file, company.id);
+                yield fs.unlinkSync(fileName);
+                yield this.exportRepository.save(this.exportRepository.create({
+                    company,
+                    enabled: true,
+                    fileLink: fileLocation,
+                }));
+                return fileLocation;
+            }
+            catch (err) {
+                throw new common_1.BadRequestException(err.message);
+            }
         });
     }
     findByCompany(company, orderBy, limit, offset) {
@@ -105,7 +108,8 @@ ExportsService = __decorate([
     __param(0, typeorm_2.InjectRepository(export_entity_1.Export)),
     __param(1, typeorm_2.InjectRepository(accounting_entry_entity_1.AccountingEntry)),
     __metadata("design:paramtypes", [typeorm_1.Repository,
-        accounting_entry_repository_1.AccountingEntryRepository])
+        accounting_entry_repository_1.AccountingEntryRepository,
+        export_storage_service_1.ExportStorageService])
 ], ExportsService);
 exports.ExportsService = ExportsService;
 //# sourceMappingURL=exports.service.js.map

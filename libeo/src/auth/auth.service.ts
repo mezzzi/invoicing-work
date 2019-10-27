@@ -27,17 +27,17 @@ export class AuthService {
       throw new HttpException('api.error.unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    if (user.enabled === false && !user.emailConfirmationToken) {
-      throw new HttpException('api.error.user.disabled', HttpStatus.UNAUTHORIZED);
-    }
+    // if (user.enabled === false && !user.emailConfirmationToken) {
+    //   throw new HttpException('api.error.user.disabled', HttpStatus.UNAUTHORIZED);
+    // }
 
-    if (user.enabled === false && user.emailConfirmationToken) {
-      throw new HttpException('api.error.user.not_activated', HttpStatus.UNAUTHORIZED);
-    }
+    // if (user.enabled === false && user.emailConfirmationToken) {
+    //   throw new HttpException('api.error.user.not_activated', HttpStatus.UNAUTHORIZED);
+    // }
 
-    if (user.blocked === true) {
-      throw new HttpException('api.error.user.blocked', HttpStatus.UNAUTHORIZED);
-    }
+    // if (user.blocked === true) {
+    //   throw new HttpException('api.error.user.blocked', HttpStatus.UNAUTHORIZED);
+    // }
 
     return user;
   }

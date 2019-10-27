@@ -1,5 +1,5 @@
-import { ITreezor } from './treezor.interface';
-export interface IBalanceParams extends ITreezor {
+import { ITreezorBasePayload } from './treezor-base-payload.interface';
+export interface IBalanceParams extends ITreezorBasePayload {
     walletId?: number;
     userId?: number;
 }

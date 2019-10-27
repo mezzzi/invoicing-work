@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
+const path = require("path");
 const jenji_strategy_1 = require("./strategies/jenji.strategy");
 const common_1 = require("@nestjs/common");
 class OcrService {
@@ -24,8 +25,10 @@ class OcrService {
     }
     loadFile(filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (filePath.indexOf('http') === -1) {
-                if (!fs.existsSync(filePath)) {
+            if (filePath.indexOf('http://localhost') !== -1) {
+                const localFilePath = filePath.replace('http://localhost:9000/static/', '');
+                const completeFilePath = path.join(process.cwd(), '/public/static', localFilePath.substring(1, localFilePath.length));
+                if (!fs.existsSync(completeFilePath)) {
                     throw new Error('api.error.ocr.file_not_found');
                 }
             }

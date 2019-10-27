@@ -1,3 +1,4 @@
+export declare const PASSWORD_PATTERN: RegExp;
 export declare class SignUpPayload {
     firstname: string;
     lastname: string;

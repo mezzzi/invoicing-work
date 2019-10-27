@@ -46,6 +46,11 @@ var CompanyCategory;
     CompanyCategory["ETI"] = "ETI";
     CompanyCategory["GE"] = "GE";
 })(CompanyCategory = exports.CompanyCategory || (exports.CompanyCategory = {}));
+var CompanyProvisionningStrategies;
+(function (CompanyProvisionningStrategies) {
+    CompanyProvisionningStrategies["TOPUP"] = "TOPUP";
+    CompanyProvisionningStrategies["AUTOLOAD"] = "AUTOLOAD";
+})(CompanyProvisionningStrategies = exports.CompanyProvisionningStrategies || (exports.CompanyProvisionningStrategies = {}));
 let Company = class Company extends base_entity_1.Base {
     constructor() {
         super(...arguments);
@@ -76,7 +81,12 @@ __decorate([
     __metadata("design:type", String)
 ], Company.prototype, "siret", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true, type: 'simple-enum', enum: CompanySource, default: CompanySource.ORIGINAL }),
+    typeorm_1.Column({
+        nullable: true,
+        type: 'simple-enum',
+        enum: CompanySource,
+        default: CompanySource.ORIGINAL,
+    }),
     __metadata("design:type", String)
 ], Company.prototype, "source", void 0);
 __decorate([
@@ -91,6 +101,14 @@ __decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
 ], Company.prototype, "vatNumber", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", Number)
+], Company.prototype, "templatePreference", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Company.prototype, "logoUrl", void 0);
 __decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
@@ -112,6 +130,34 @@ __decorate([
     __metadata("design:type", String)
 ], Company.prototype, "legalForm", void 0);
 __decorate([
+    typeorm_1.Column({ nullable: true, type: 'simple-enum', enum: CompanyCategory }),
+    __metadata("design:type", String)
+], Company.prototype, "category", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Company.prototype, "slogan", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Company.prototype, "domainName", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", Number)
+], Company.prototype, "capital", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Company.prototype, "legalAnnualTurnOver", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true }),
+    __metadata("design:type", String)
+], Company.prototype, "legalNetIncomeRange", void 0);
+__decorate([
+    typeorm_1.Column({ nullable: true, transformer: encrypt_value_transformer_1.encrypt }),
+    __metadata("design:type", String)
+], Company.prototype, "phone", void 0);
+__decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
 ], Company.prototype, "treezorEmail", void 0);
@@ -132,13 +178,13 @@ __decorate([
     __metadata("design:type", String)
 ], Company.prototype, "treezorBic", void 0);
 __decorate([
+    typeorm_1.Column({ nullable: true, default: false }),
+    __metadata("design:type", Boolean)
+], Company.prototype, "isFreezed", void 0);
+__decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
 ], Company.prototype, "libeoEmail", void 0);
-__decorate([
-    typeorm_1.Column({ nullable: true, type: 'simple-enum', enum: CompanyCategory }),
-    __metadata("design:type", String)
-], Company.prototype, "category", void 0);
 __decorate([
     typeorm_1.OneToMany(type => address_entity_1.Address, address => address.company, { cascade: true }),
     __metadata("design:type", Array)
@@ -172,37 +218,17 @@ __decorate([
     __metadata("design:type", String)
 ], Company.prototype, "kycStep", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true }),
-    __metadata("design:type", Number)
-], Company.prototype, "capital", void 0);
-__decorate([
-    typeorm_1.Column({ nullable: true }),
-    __metadata("design:type", String)
-], Company.prototype, "legalAnnualTurnOver", void 0);
-__decorate([
-    typeorm_1.Column({ nullable: true }),
-    __metadata("design:type", String)
-], Company.prototype, "legalNetIncomeRange", void 0);
-__decorate([
-    typeorm_1.Column({ nullable: true, transformer: encrypt_value_transformer_1.encrypt }),
-    __metadata("design:type", String)
-], Company.prototype, "phone", void 0);
-__decorate([
     typeorm_1.Column({ nullable: true, type: 'simple-json' }),
     __metadata("design:type", Object)
 ], Company.prototype, "signature", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true, default: false }),
-    __metadata("design:type", Boolean)
-], Company.prototype, "isFreezed", void 0);
-__decorate([
-    typeorm_1.Column({ nullable: true }),
+    typeorm_1.Column({ nullable: true, type: 'simple-enum', enum: CompanyProvisionningStrategies, default: CompanyProvisionningStrategies.TOPUP }),
     __metadata("design:type", String)
-], Company.prototype, "slogan", void 0);
+], Company.prototype, "provisionningStrategy", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true }),
-    __metadata("design:type", String)
-], Company.prototype, "domainName", void 0);
+    typeorm_1.Column({ nullable: true, default: 0 }),
+    __metadata("design:type", Number)
+], Company.prototype, "sddeRefusedCount", void 0);
 Company = __decorate([
     typeorm_1.Entity()
 ], Company);

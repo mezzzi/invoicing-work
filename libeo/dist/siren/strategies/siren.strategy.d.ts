@@ -1,7 +1,6 @@
 import { Strategy, Companies } from '../interfaces/strategy.interface';
-import { Utils } from '../utils.service';
 import { ConfigService } from 'nestjs-config';
-export declare class SirenStrategy extends Utils implements Strategy {
+export declare class SirenStrategy implements Strategy {
     constructor(config: ConfigService);
     readonly baseUrl: string;
     readonly endpoint: string;

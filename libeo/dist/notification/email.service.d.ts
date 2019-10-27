@@ -1,8 +1,10 @@
 import { EmailServiceInterface } from './interface/email-service.interface';
+import { Logger } from '@nestjs/common';
 import { EmailMessage } from './interface/email-message.interface';
 import { ConfigService } from 'nestjs-config';
 export declare class EmailService implements EmailServiceInterface {
-    constructor(configService: ConfigService);
+    private readonly logger;
     private readonly mailer;
-    send(messagesDetail: EmailMessage<any>[]): void;
+    constructor(configService: ConfigService, logger: Logger);
+    send(messagesDetail: EmailMessage<any>[]): Promise<void>;
 }

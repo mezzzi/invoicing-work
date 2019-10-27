@@ -1,29 +1,29 @@
-import ApolloClient from 'apollo-client';
-import gql from 'graphql-tag';
-import moment from 'moment';
-import * as React from 'react';
-import { compose, graphql, withApollo } from 'react-apollo';
+import ApolloClient from "apollo-client";
+import gql from "graphql-tag";
+import moment from "moment";
+import * as React from "react";
+import { compose, graphql, withApollo } from "react-apollo";
 
 import {
   ICompany as IInvoiceCompany,
-  IProduct,
-} from 'components/Invoicing/types';
-import { IInvoiceData } from 'components/Invoicing/types';
-import { Loading } from 'components/Loading';
-import * as Invoice from 'context/Invoice';
-import { createOrUpdateAR, emittedInvoice } from 'context/Invoice/queries';
-import { emittedInvoices } from 'context/Invoices/queries';
-import { getMe } from 'context/User/queries';
+  IProduct
+} from "components/Invoicing/types";
+import { IInvoiceData } from "components/Invoicing/types";
+import { Loading } from "components/Loading";
+import * as Invoice from "context/Invoice";
+import { createOrUpdateAR, emittedInvoice } from "context/Invoice/queries";
+import { emittedInvoices } from "context/Invoices/queries";
+import { getMe } from "context/User/queries";
 
 import {
   IInvoice,
   InvoiceStatus,
-  IUpdateInvoiceInput,
-} from 'context/Invoice/types';
+  IUpdateInvoiceInput
+} from "context/Invoice/types";
 
-import { ICompany } from 'context/Company/types';
+import { ICompany } from "context/Company/types";
 
-import { Provider } from 'screens/Invoicing/contexts/AutoSave/context';
+import { Provider } from "screens/Invoicing/contexts/AutoSave/context";
 
 interface IState extends IInvoiceData {
   isLoading: boolean;
@@ -46,8 +46,8 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
       legalNotices: {},
       partner: {},
       pricingInfo: {},
-      products: [{ id: '0', order: 0, price: 0, quantity: 0, vatRate: 0 }],
-      templateId: '1',
+      products: [{ id: "0", order: 0, price: 0, quantity: 0, vatRate: 0 }],
+      templateId: "1"
     };
   }
 
@@ -61,7 +61,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
 
   doneLoading = () => {
     this.setState({
-      isLoading: false,
+      isLoading: false
     });
   };
 
@@ -79,25 +79,26 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
     const { client } = this.props;
     const {
       data: {
-        me: { currentCompany: companyEmitter },
+        me: { currentCompany: companyEmitter }
       },
-      errors: meErrors,
+      errors: meErrors
     } = await client.query({
-      query: getMe,
+      query: getMe
     });
-    if (companyEmitter) {
+    // companyEmitter.name is to guard against empty companyEmitter
+    if (companyEmitter && companyEmitter.name) {
       const emitterCompany = this.databaseCompanyToInvoiceCompany(
-        companyEmitter,
+        companyEmitter
       );
       this.setState({
         arCreatedById: `${companyEmitter.id}`,
         currentCompany: companyEmitter,
         emitterCompany,
         headerInfo: {
-          logoUrl: companyEmitter.logoUrl,
+          logoUrl: companyEmitter.logoUrl
         },
         // 0 templateId is equivalent to null
-        templateId: `${companyEmitter.templatePreference || 0}`,
+        templateId: `${companyEmitter.templatePreference || 0}`
       });
       return true;
     } else {
@@ -111,7 +112,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
     if (id) {
       const { data, errors } = await client.query({
         query: emittedInvoice,
-        variables: { id, isAR: true },
+        variables: { id, isAR: true }
       });
       if (errors) {
         return false;
@@ -123,8 +124,8 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
         variables: {
           filters: { status: InvoiceStatus.ArDraft },
           limit: 1,
-          offset: 0,
-        },
+          offset: 0
+        }
       });
       if (errors) {
         return false;
@@ -138,7 +139,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
     const fetchedInvoice: IInvoiceData = this.getStateFromInvoice(invoice);
     this.setState({
       isUpdating: true,
-      ...fetchedInvoice,
+      ...fetchedInvoice
     });
     return true;
   };
@@ -146,11 +147,11 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
   updateInvoiceData = (changedValues: IInvoiceData) => {
     this.setState(
       {
-        ...changedValues,
+        ...changedValues
       },
       () => {
         this.persistToDatabase();
-      },
+      }
     );
   };
 
@@ -160,7 +161,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
 
     if (!isUpdating) {
       this.setState({
-        isUpdating: true,
+        isUpdating: true
       });
       this.createOrUpdateInvoice(input, undefined);
     } else {
@@ -170,56 +171,56 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
 
   getInvoiceFromJsonState = (): IUpdateInvoiceInput => {
     const {
-      headerInfo: { contact = {}, documentType = 'Quote' } = {},
+      headerInfo: { contact = {}, documentType = "Quote" } = {},
       emitterCompany = {},
       receiverCompany = {},
-      templateId = '1',
+      templateId = "1",
       generalInfo: {
         invoiceDueDate: dueDate = moment()
-          .add(30, 'days')
-          .format('DD/MM/YYYY'),
-        invoiceDate = moment().format('DD/MM/YYYY'),
-        invoiceDetails: invoiceDescription = 'Default Description',
-        invoiceNumber = '84a55074-ea50-4dbe-9a7e-7588437ccd16',
-        invoiceTitle: emitterTitle = 'Default Title',
+          .add(30, "days")
+          .format("DD/MM/YYYY"),
+        invoiceDate = moment().format("DD/MM/YYYY"),
+        invoiceDetails: invoiceDescription = "Default Description",
+        invoiceNumber = "84a55074-ea50-4dbe-9a7e-7588437ccd16",
+        invoiceTitle: emitterTitle = "Default Title"
       } = {},
       pricingInfo: {
         discount = 0,
         totalAllWithVat: total = 0,
-        totalAllWithoutVat: totalWoT = 0,
+        totalAllWithoutVat: totalWoT = 0
       } = {},
-      partner: { addresses = ['partner address'] } = {},
+      partner: { addresses = ["partner address"] } = {},
       legalNotices: displayLegalNotice = {},
-      products = [{ id: '0', order: 0, price: 0, quantity: 0, vatRate: 0 }],
+      products = [{ id: "0", order: 0, price: 0, quantity: 0, vatRate: 0 }]
     } = this.state;
 
     const input: IUpdateInvoiceInput = {
       arCreatedById: emitterCompany.id,
       companyEmitterContactDetails: {
-        ...contact,
+        ...contact
       },
       companyEmitterDetails: {
-        ...emitterCompany,
+        ...emitterCompany
       },
       companyEmitterId: emitterCompany.id,
       companyReceiverDetails: {
-        ...receiverCompany,
+        ...receiverCompany
       },
-      currency: 'US',
+      currency: "US",
       discount,
       displayLegalNotice,
       documentType,
-      dueDate: moment(dueDate, 'DD/MM/YYYY').toDate(),
+      dueDate: moment(dueDate, "DD/MM/YYYY").toDate(),
       emitterTitle,
-      invoiceDate: moment(invoiceDate, 'DD/MM/YYYY').toDate(),
+      invoiceDate: moment(invoiceDate, "DD/MM/YYYY").toDate(),
       invoiceDescription,
       number: invoiceNumber,
       products,
-      source: 'LibeoAR',
+      source: "LibeoAR",
       templateId: Number(templateId),
       total,
       totalWoT,
-      vatAmounts: { what: 'are these?' },
+      vatAmounts: { what: "are these?" }
     };
 
     return input;
@@ -238,13 +239,13 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
       addresses: { rows } = {
         rows: [
           {
-            address1: 'fake address1',
-            address2: 'fake address2',
-            city: 'fake city',
-            zipcode: 'fake zipcode',
-          },
-        ],
-      },
+            address1: "fake address1",
+            address2: "fake address2",
+            city: "fake city",
+            zipcode: "fake zipcode"
+          }
+        ]
+      }
     } = company;
     return {
       address1: rows[0].address1,
@@ -254,7 +255,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
       name,
       siret,
       vatNumber,
-      zipcode: `${rows[0].zipcode}`,
+      zipcode: `${rows[0].zipcode}`
     };
   };
 
@@ -275,38 +276,38 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
       products,
       source,
       total,
-      totalWoT,
+      totalWoT
     } = input;
     const receiverCompany = this.databaseCompanyToInvoiceCompany(
-      companyReceiver,
+      companyReceiver
     );
 
     const { headerInfo } = this.state;
     const invoiceData: IInvoiceData = {
       defaultPartner: companyReceiver,
       generalInfo: {
-        invoiceDate: moment(invoiceDate).format('DD/MM/YYYY'),
+        invoiceDate: moment(invoiceDate).format("DD/MM/YYYY"),
         invoiceDetails: invoiceDescription,
-        invoiceDueDate: moment(dueDate).format('DD/MM/YYYY'),
+        invoiceDueDate: moment(dueDate).format("DD/MM/YYYY"),
         invoiceNumber: input.number,
-        invoiceTitle: emitterTitle,
+        invoiceTitle: emitterTitle
       },
       headerInfo: {
         ...headerInfo,
         contact: {
-          ...companyEmitterContactDetails,
+          ...companyEmitterContactDetails
         },
-        documentType,
+        documentType
       },
       invoiceId,
       legalNotices: displayLegalNotice,
       pricingInfo: {
         discount,
         totalAllWithVat: total,
-        totalAllWithoutVat: totalWoT,
+        totalAllWithoutVat: totalWoT
       },
       products,
-      receiverCompany,
+      receiverCompany
     };
 
     return invoiceData;
@@ -318,7 +319,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
       if (id) {
         const { errors, data } = await client.mutate({
           mutation: createOrUpdateAR,
-          variables: { id, input },
+          variables: { id, input }
         });
         if (errors) {
           return null;
@@ -327,7 +328,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
       } else {
         const { errors, data } = await client.mutate({
           mutation: createOrUpdateAR,
-          variables: { input },
+          variables: { input }
         });
         if (errors) {
           return null;
@@ -335,7 +336,7 @@ class AutoSaveProvider extends React.Component<IProps, IState> {
         const { arCreatedById, id: invoiceId } = data.createOrUpdateAR;
         this.setState({
           arCreatedById,
-          invoiceId,
+          invoiceId
         });
         return data.createOrUpdateAR;
       }

@@ -1,9 +1,10 @@
 import { Invoice } from './invoice.entity';
 import { User } from './user.entity';
 import { Base } from './base.entity';
+import { Payin } from './payin.entity';
 export declare enum PaymentStatus {
     REQUESTED = "REQUESTED",
-    SENT_TO_TREEZOR = "SENT_TO_TREEZOR",
+    BEING_PROCESSED = "BEING_PROCESSED",
     TREEZOR_PENDING = "TREEZOR_PENDING",
     TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE = "TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE",
     TREEZOR_SYNC_KO_MISC = "TREEZOR_SYNC_KO_MISC",
@@ -28,4 +29,5 @@ export declare class Payment extends Base {
     treezorValidationAt: Date;
     treezorPayerWalletId: number;
     treezorBeneficiaryId: number;
+    payin: Payin;
 }

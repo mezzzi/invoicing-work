@@ -1,5 +1,5 @@
-import { ITreezor } from './treezor.interface';
-export interface IBusinessParams extends ITreezor {
+import { ITreezorBasePayload } from './treezor-base-payload.interface';
+export interface IBusinessParams extends ITreezorBasePayload {
     country: string;
     externalId?: string;
     registrationNumber?: string;

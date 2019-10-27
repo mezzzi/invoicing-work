@@ -33,9 +33,19 @@ let InvoicesResolvers = class InvoicesResolvers {
         this.paymentsService = paymentsService;
         this.historiesService = historiesService;
     }
+    uploadRib(file, invoiceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.uploadRib(file, invoiceId);
+        });
+    }
     createInvoice(ctx, input) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.invoicesService.createInvoice(ctx.req.user, input);
+        });
+    }
+    createOrUpdateAR(ctx, id, input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.createOrUpdateAR(ctx.req.user, id, input);
         });
     }
     updateInvoice(ctx, id, input) {
@@ -53,6 +63,11 @@ let InvoicesResolvers = class InvoicesResolvers {
             return this.invoicesService.removeInvoice(ctx.req.user, id);
         });
     }
+    removeAll(input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.removeAll();
+        });
+    }
     generateCode(ctx, invoiceId) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.invoicesService.generateCode(ctx.req.user, invoiceId);
@@ -63,9 +78,29 @@ let InvoicesResolvers = class InvoicesResolvers {
             return this.invoicesService.findByCompany(ctx.req.user.currentCompany, filters, orderBy, limit, offset);
         });
     }
+    emittedInvoices(ctx, filters, orderBy, limit, offset) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.findByEmitterCompany(ctx.req.user.currentCompany, filters, orderBy, limit, offset);
+        });
+    }
     invoice(ctx, id) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.invoicesService.findOneByIdAndCurrentCompany(id, ctx.req.user.currentCompany);
+        });
+    }
+    emittedInvoice(ctx, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.findOneByIdAndEmitterCompany(id, ctx.req.user.currentCompany);
+        });
+    }
+    estimatedBalance(invoice) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.findEstimatedBalance(invoice);
+        });
+    }
+    paymentAt(invoice) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.invoicesService.findPaymentAt(invoice);
         });
     }
     history(invoice, orderBy, limit, offset) {
@@ -76,8 +111,16 @@ let InvoicesResolvers = class InvoicesResolvers {
 };
 __decorate([
     graphql_1.Mutation(),
+    __param(0, graphql_1.Args('file')), __param(1, graphql_1.Args('invoiceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "uploadRib", null);
+__decorate([
+    graphql_1.Mutation(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
-    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('input')),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('input')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
@@ -85,7 +128,19 @@ __decorate([
 __decorate([
     graphql_1.Mutation(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
-    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('id')), __param(2, graphql_1.Args('input')),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('id')),
+    __param(2, graphql_1.Args('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "createOrUpdateAR", null);
+__decorate([
+    graphql_1.Mutation(),
+    common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('id')),
+    __param(2, graphql_1.Args('input')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
@@ -101,7 +156,8 @@ __decorate([
 __decorate([
     graphql_1.Mutation(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
-    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('id')),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
@@ -109,7 +165,16 @@ __decorate([
 __decorate([
     graphql_1.Mutation(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
-    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('invoiceId')),
+    __param(0, graphql_1.Args('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Boolean]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "removeAll", null);
+__decorate([
+    graphql_1.Mutation(),
+    common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('invoiceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
@@ -117,7 +182,11 @@ __decorate([
 __decorate([
     graphql_1.Query(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
-    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('filters')), __param(2, graphql_1.Args('orderBy')), __param(3, graphql_1.Args('limit')), __param(4, graphql_1.Args('offset')),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('filters')),
+    __param(2, graphql_1.Args('orderBy')),
+    __param(3, graphql_1.Args('limit')),
+    __param(4, graphql_1.Args('offset')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object, String, Number, Number]),
     __metadata("design:returntype", Promise)
@@ -125,11 +194,47 @@ __decorate([
 __decorate([
     graphql_1.Query(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
-    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('id')),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('filters')),
+    __param(2, graphql_1.Args('orderBy')),
+    __param(3, graphql_1.Args('limit')),
+    __param(4, graphql_1.Args('offset')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, Number, Number]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "emittedInvoices", null);
+__decorate([
+    graphql_1.Query(),
+    common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], InvoicesResolvers.prototype, "invoice", null);
+__decorate([
+    graphql_1.Query(),
+    common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
+    __param(0, graphql_1.Context()),
+    __param(1, graphql_1.Args('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "emittedInvoice", null);
+__decorate([
+    graphql_1.ResolveProperty(),
+    __param(0, graphql_1.Parent()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [invoice_entity_1.Invoice]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "estimatedBalance", null);
+__decorate([
+    graphql_1.ResolveProperty(),
+    __param(0, graphql_1.Parent()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [invoice_entity_1.Invoice]),
+    __metadata("design:returntype", Promise)
+], InvoicesResolvers.prototype, "paymentAt", null);
 __decorate([
     graphql_1.ResolveProperty(),
     __param(0, graphql_1.Parent()), __param(1, graphql_1.Args('orderBy')), __param(2, graphql_1.Args('limit')), __param(3, graphql_1.Args('offset')),

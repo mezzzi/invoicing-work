@@ -20,7 +20,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crypto = require("crypto");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
@@ -41,40 +40,11 @@ let WebhooksService = class WebhooksService {
         });
         return data;
     }
-    compareSignature(data) {
-        if (data.object_payload) {
-            const signature = crypto
-                .createHmac('sha256', process.env.TREEZOR_SECRET_KEY)
-                .update(JSON.stringify(data.object_payload))
-                .digest()
-                .toString('base64');
-            if (signature !== data.object_payload_signature) {
-                throw new common_1.HttpException('Incorrect signature webhook', common_1.HttpStatus.BAD_REQUEST);
-            }
-        }
-    }
     createWebhook(data) {
         return __awaiter(this, void 0, void 0, function* () {
             data = this.snakeToCamel(data);
             const webhook = this.webhookRepository.create(data);
             return this.webhookRepository.save(webhook);
-        });
-    }
-    updateWebhook(where, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (process.env.DOMAIN && process.env.DOMAIN !== 'api.sandbox.libeo.io') {
-                this.compareSignature(data);
-            }
-            data = this.snakeToCamel(data);
-            let webhook = yield this.webhookRepository.findOne(where);
-            if (!webhook) {
-                webhook = this.webhookRepository.create(data);
-            }
-            else {
-                webhook = Object.assign(webhook, data);
-            }
-            yield this.webhookRepository.save(webhook);
-            return webhook;
         });
     }
 };

@@ -62,6 +62,11 @@ let CompaniesResolvers = class CompaniesResolvers {
             return this.companiesService.updateKycStep(ctx.req.user.currentCompany, step);
         });
     }
+    uploadLogo(ctx, file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.companiesService.uploadLogo(file, ctx.req.user.currentCompany);
+        });
+    }
     searchCompanies(query, orderBy, limit, offset) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.companiesService.searchCompanies(query, orderBy, limit, offset);
@@ -166,6 +171,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], CompaniesResolvers.prototype, "updateKycStep", null);
+__decorate([
+    graphql_1.Mutation(),
+    common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),
+    __param(0, graphql_1.Context()), __param(1, graphql_1.Args('file')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], CompaniesResolvers.prototype, "uploadLogo", null);
 __decorate([
     graphql_1.Query(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),

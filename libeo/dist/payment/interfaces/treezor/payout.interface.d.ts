@@ -1,5 +1,5 @@
-import { ITreezor } from './treezor.interface';
-export interface ICreatePayoutParams extends ITreezor {
+import { ITreezorBasePayload } from './treezor-base-payload.interface';
+export interface ICreatePayoutParams extends ITreezorBasePayload {
     payoutTag?: string;
     walletId: number;
     bankaccountId?: number;

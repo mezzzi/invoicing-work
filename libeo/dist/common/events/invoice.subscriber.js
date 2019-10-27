@@ -46,6 +46,7 @@ let InvoiceSubscriber = class InvoiceSubscriber {
                 const payment = yield typeorm_1.getRepository(payment_entity_1.Payment).findOne({ where: { status: payment_entity_1.PaymentStatus.REQUESTED, invoice: { id: event.databaseEntity.id } }, order: { id: 'DESC' } });
                 if (payment) {
                     params.paymentAt = payment.paymentAt;
+                    params.libeoEstimatedBalance = payment.libeoEstimatedBalance;
                 }
             }
             yield historiesService.createHistory({
@@ -64,7 +65,7 @@ let InvoiceSubscriber = class InvoiceSubscriber {
                     invoice: event.databaseEntity,
                     status: typeorm_1.In([
                         payment_entity_1.PaymentStatus.REQUESTED,
-                        payment_entity_1.PaymentStatus.SENT_TO_TREEZOR,
+                        payment_entity_1.PaymentStatus.BEING_PROCESSED,
                         payment_entity_1.PaymentStatus.TREEZOR_PENDING,
                         payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE,
                         payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC,

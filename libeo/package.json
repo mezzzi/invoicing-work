@@ -21,6 +21,7 @@
     "test:e2e:watch": "jest --watch --config=e2e/jest-e2e.json",
     "sentry": "node createReleaseOnSentry.js",
     "typeorm": "ts-node -r tsconfig-paths/register ../node_modules/typeorm/cli.js"
+
   },
   "dependencies": {
     "@nestjs/common": "^6.1.1",

@@ -26,9 +26,8 @@ const apollo_server_env_1 = require("apollo-server-env");
 const common_1 = require("@nestjs/common");
 const utils_service_1 = require("../utils.service");
 const nestjs_config_1 = require("nestjs-config");
-let SirenStrategy = class SirenStrategy extends utils_service_1.Utils {
+let SirenStrategy = class SirenStrategy {
     constructor(config) {
-        super();
         this.baseUrl = process.env.SIREN_API_URL;
         this.endpoint = this.baseUrl + '/entreprises/sirene/V3';
         this.bearerToken = process.env.SIREN_BEARER_TOKEN;
@@ -109,23 +108,23 @@ let SirenStrategy = class SirenStrategy extends utils_service_1.Utils {
                 'codePostalEtablissement',
                 'libelleCommuneEtablissement',
             ];
-            const prefix = this.getPrefix(query);
+            const prefix = utils_service_1.getPrefixTypeSearchCompanies(query);
             let additionalConditions = ' AND etatAdministratifUniteLegale:"A" AND etatAdministratifUniteLegale:"A"';
-            if (prefix !== utils_service_1.Type.SIRET) {
+            if (prefix !== utils_service_1.SearchCompaniesType.SIRET) {
                 additionalConditions += ' AND etablissementSiege:"true"';
             }
-            if (prefix === utils_service_1.Type.QUERY) {
+            if (prefix === utils_service_1.SearchCompaniesType.QUERY) {
                 let words = query.split(' ');
                 const nbWords = words.length;
                 words = words.map((word, index) => {
                     if (index === 0) {
-                        return `${utils_service_1.Type.QUERY}:"*${word}"`;
+                        return `${utils_service_1.SearchCompaniesType.QUERY}:"*${word}"`;
                     }
                     else if (index === (nbWords - 1)) {
-                        return `${utils_service_1.Type.QUERY}:"${word}*"`;
+                        return `${utils_service_1.SearchCompaniesType.QUERY}:"${word}*"`;
                     }
                     else {
-                        return `${utils_service_1.Type.QUERY}:"*${word}"`;
+                        return `${utils_service_1.SearchCompaniesType.QUERY}:"*${word}"`;
                     }
                 });
                 query = words.join(' AND ');

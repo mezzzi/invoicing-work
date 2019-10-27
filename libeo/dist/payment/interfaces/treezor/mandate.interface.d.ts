@@ -13,7 +13,6 @@ export declare enum MandateOrigin {
 export interface ICreateMandateParams {
     sddType?: MandateSddType;
     isPaper?: boolean;
-    userId: string;
     debtorName: string;
     debtorAddress: string;
     debtorCity: string;
@@ -25,6 +24,9 @@ export interface ICreateMandateParams {
     createdIp: string;
     signatureDate?: string;
 }
+export declare type ICreateMandateMandatoryParams = ICreateMandateParams & {
+    userId: string;
+};
 export interface IDeleteMandateParams {
     mandateId: string;
     origin: MandateOrigin;

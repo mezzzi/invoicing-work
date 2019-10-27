@@ -8,7 +8,7 @@ export declare class UsersResolvers {
     private readonly usersService;
     constructor(companiesService: CompaniesService, usersService: UsersService);
     refreshConfirmationTokenUser(ctx: any, email: string): Promise<User>;
-    activationUser(confirmationToken: string): Promise<boolean>;
+    activateUser(confirmationToken: string): Promise<boolean>;
     updateUser(ctx: any, data: UpdateUserDto): Promise<User>;
     me(ctx: any): User;
     companies(user: User): Promise<List>;

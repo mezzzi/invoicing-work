@@ -42,9 +42,9 @@ let UsersResolvers = class UsersResolvers {
             return this.usersService.confirmationToken(user, baseUrl);
         });
     }
-    activationUser(confirmationToken) {
+    activateUser(confirmationToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.usersService.activationUser(confirmationToken);
+            return this.usersService.activateUser(confirmationToken);
         });
     }
     updateUser(ctx, data) {
@@ -74,7 +74,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], UsersResolvers.prototype, "activationUser", null);
+], UsersResolvers.prototype, "activateUser", null);
 __decorate([
     graphql_1.Mutation(),
     common_1.UseGuards(new jwt_auth_guard_1.GqlAuthGuard()),

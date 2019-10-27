@@ -19,40 +19,22 @@ const histories_service_1 = require("../services/histories.service");
 const history_entity_1 = require("../entities/history.entity");
 const histories_dto_1 = require("../dto/histories.dto");
 const payment_entity_1 = require("../entities/payment.entity");
-const treezor_service_1 = require("../../payment/treezor.service");
 const common_1 = require("@nestjs/common");
 let PaymentSubscriber = class PaymentSubscriber {
     checkStatusChange(event) {
         const validatedStatuses = {};
-        validatedStatuses[payment_entity_1.PaymentStatus.REQUESTED] = [payment_entity_1.PaymentStatus.SENT_TO_TREEZOR, payment_entity_1.PaymentStatus.CANCELLED];
-        validatedStatuses[payment_entity_1.PaymentStatus.SENT_TO_TREEZOR] = [payment_entity_1.PaymentStatus.TREEZOR_PENDING, payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE, payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC, payment_entity_1.PaymentStatus.CANCELLED];
+        validatedStatuses[payment_entity_1.PaymentStatus.REQUESTED] = [payment_entity_1.PaymentStatus.BEING_PROCESSED, payment_entity_1.PaymentStatus.CANCELLED];
+        validatedStatuses[payment_entity_1.PaymentStatus.BEING_PROCESSED] = [payment_entity_1.PaymentStatus.TREEZOR_PENDING, payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE, payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC, payment_entity_1.PaymentStatus.CANCELLED];
         validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_PENDING] = [payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC, payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE, payment_entity_1.PaymentStatus.CANCELLED, payment_entity_1.PaymentStatus.TREEZOR_WH_VALIDATED];
-        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE] = [payment_entity_1.PaymentStatus.SENT_TO_TREEZOR, payment_entity_1.PaymentStatus.CANCELLED];
-        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC] = [payment_entity_1.PaymentStatus.CANCELLED];
-        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE] = [payment_entity_1.PaymentStatus.SENT_TO_TREEZOR];
-        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC] = [payment_entity_1.PaymentStatus.SENT_TO_TREEZOR];
+        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE] = [payment_entity_1.PaymentStatus.BEING_PROCESSED, payment_entity_1.PaymentStatus.CANCELLED];
+        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC] = [payment_entity_1.PaymentStatus.BEING_PROCESSED, payment_entity_1.PaymentStatus.CANCELLED];
+        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE] = [payment_entity_1.PaymentStatus.BEING_PROCESSED];
+        validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC] = [payment_entity_1.PaymentStatus.BEING_PROCESSED];
         validatedStatuses[payment_entity_1.PaymentStatus.TREEZOR_WH_VALIDATED] = [];
         validatedStatuses[payment_entity_1.PaymentStatus.CANCELLED] = [];
         if (validatedStatuses[event.databaseEntity.status].indexOf(event.entity.status) === -1) {
-            throw new common_1.HttpException('api.error.payment.status', common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException({ msg: 'api.error.payment.status', info: { databaseStatus: event.databaseEntity.status, newStatus: event.entity.status } }, common_1.HttpStatus.BAD_REQUEST);
         }
-    }
-    cancelPaymentTreezor(event) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (event.entity.status === payment_entity_1.PaymentStatus.CANCELLED && event.databaseEntity.treezorPayoutId) {
-                const treezor = new treezor_service_1.TreezorService({
-                    baseUrl: process.env.TREEZOR_API_URL,
-                    token: process.env.TREEZOR_TOKEN,
-                    secretKey: process.env.TREEZOR_SECRET_KEY,
-                });
-                try {
-                    yield treezor.deletePayout(event.databaseEntity.treezorPayoutId);
-                }
-                catch (err) {
-                    throw new common_1.HttpException(err.message, err.statusCode);
-                }
-            }
-        });
     }
     createHistory(entity, databaseEntity) {
         const historiesService = new histories_service_1.HistoriesService(typeorm_1.getRepository('History'));
@@ -65,7 +47,7 @@ let PaymentSubscriber = class PaymentSubscriber {
                 params.user = entity.paymentRequestUser;
                 params.paymentId = entity.id;
                 break;
-            case payment_entity_1.PaymentStatus.SENT_TO_TREEZOR:
+            case payment_entity_1.PaymentStatus.BEING_PROCESSED:
                 params.user = entity.paymentRequestUser;
                 params.paymentId = entity.id;
                 break;

@@ -59,15 +59,16 @@ let UsersService = class UsersService {
             return this.userRepository.findOne({ email: email.toLocaleLowerCase() });
         });
     }
-    findOneByConfirmationToken(confirmationToken) {
+    findOneByPasswordConfirmationToken(passwordConfirmationToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.userRepository.findOne({ confirmationToken });
+            return this.userRepository.findOne({ passwordConfirmationToken });
         });
     }
     updatePassword(user, newPassword) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 user.password = yield this.getHash(newPassword);
+                user.passwordConfirmationToken = this.tokenGeneratorService.generateToken();
                 yield user.save();
             }
             catch (err) {
@@ -88,7 +89,7 @@ let UsersService = class UsersService {
     confirmationToken(user, baseUrl) {
         return __awaiter(this, void 0, void 0, function* () {
             user.enabled = false;
-            user.confirmationToken = this.tokenGeneratorService.generateToken();
+            user.emailConfirmationToken = this.tokenGeneratorService.generateToken();
             yield user.save();
             const message = {
                 To: [{
@@ -99,21 +100,21 @@ let UsersService = class UsersService {
                 Subject: 'Activez votre compte Libeo',
                 Variables: {
                     fullName: user.fullName,
-                    emailValidationLink: (baseUrl) ? `${baseUrl}/login/${user.confirmationToken}?email=${user.email}` : `https://libeoweb.livedemo.fr/${user.confirmationToken}?email=${user.email}`,
+                    emailValidationLink: `${baseUrl}/login/${user.emailConfirmationToken}?email=${user.email}`
                 },
             };
-            this.emailService.send([message]);
+            yield this.emailService.send([message]);
             return user;
         });
     }
-    activationUser(confirmationToken) {
+    activateUser(confirmationToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userRepository.findOne({ enabled: false, confirmationToken });
+            const user = yield this.userRepository.findOne({ enabled: false, emailConfirmationToken: confirmationToken });
             if (!user) {
                 throw new common_1.HttpException('api.error.user.invalid_confirmation_token', common_1.HttpStatus.BAD_REQUEST);
             }
             user.enabled = true;
-            user.confirmationToken = null;
+            user.emailConfirmationToken = null;
             yield user.save();
             return true;
         });

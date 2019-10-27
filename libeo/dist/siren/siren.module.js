@@ -10,10 +10,12 @@ const common_1 = require("@nestjs/common");
 const siren_service_1 = require("./siren.service");
 const siren_strategy_1 = require("./strategies/siren.strategy");
 const treezor_strategy_1 = require("./strategies/treezor.strategy");
+const payment_module_1 = require("../payment/payment.module");
 let SirenModule = class SirenModule {
 };
 SirenModule = __decorate([
     common_1.Module({
+        imports: [payment_module_1.PaymentModule],
         providers: [siren_strategy_1.SirenStrategy, treezor_strategy_1.TreezorStrategy, siren_service_1.SirenService, common_1.Logger],
         exports: [siren_service_1.SirenService]
     })

@@ -32,14 +32,21 @@ let PaymentRepository = class PaymentRepository extends typeorm_1.Repository {
             return (res && res.sum) ? res.sum : 0;
         });
     }
-    getDeferredPayments(status) {
+    getDeferredPayments() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.createQueryBuilder('p')
+                .leftJoinAndSelect('p.payin', 'payin')
                 .leftJoinAndSelect('p.invoice', 'i')
                 .leftJoinAndSelect('i.companyReceiver', 'c')
                 .where('p.paymentAt <= :date', { date: new Date() })
                 .andWhere('p.treezorBeneficiaryId is not null')
-                .andWhere('p.status IN(:...status)', { status })
+                .andWhere('p.status IN(:...status)', { status: [
+                    payment_entity_1.PaymentStatus.REQUESTED,
+                    payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE,
+                    payment_entity_1.PaymentStatus.TREEZOR_SYNC_KO_MISC,
+                    payment_entity_1.PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE,
+                    payment_entity_1.PaymentStatus.TREEZOR_WH_KO_MISC,
+                ] })
                 .andWhere('p.libeoEstimatedBalance > 0')
                 .andWhere('c.kycStatus = :companyKycStatus', { companyKycStatus: company_entity_1.CompanyKycStatus.VALIDATED })
                 .andWhere('c.isFreezed IS NOT TRUE')

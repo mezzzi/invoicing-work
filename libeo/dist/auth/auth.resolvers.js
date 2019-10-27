@@ -30,11 +30,13 @@ const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const reset_password_dto_1 = require("./interfaces/reset-password.dto");
 const email_service_1 = require("../notification/email.service");
 const token_generator_service_1 = require("../common/services/token-generator.service");
+const support_service_1 = require("../notification/support.service");
 let AuthResolvers = class AuthResolvers {
-    constructor(authService, usersService, emailService, tokenGeneratorService) {
+    constructor(authService, usersService, emailService, supportService, tokenGeneratorService) {
         this.authService = authService;
         this.usersService = usersService;
         this.emailService = emailService;
+        this.supportService = supportService;
         this.tokenGeneratorService = tokenGeneratorService;
     }
     signup(ctx, input) {
@@ -53,6 +55,7 @@ let AuthResolvers = class AuthResolvers {
             user = yield this.usersService.createUser(input);
             const baseUrl = (ctx.req.headers && ctx.req.headers.origin) ? ctx.req.headers.origin : null;
             this.usersService.confirmationToken(user, baseUrl);
+            yield this.supportService.createTicketNewUser(user);
             return user;
         });
     }
@@ -80,7 +83,7 @@ let AuthResolvers = class AuthResolvers {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.usersService.findOneByEmail(input.email);
             if (user) {
-                user.confirmationPasswordToken = this.tokenGeneratorService.generateToken();
+                user.passwordConfirmationToken = this.tokenGeneratorService.generateToken();
                 yield user.save();
                 const baseUrl = (ctx.req.headers && ctx.req.headers.origin) ? ctx.req.headers.origin : `://${process.env.DOMAIN}`;
                 const resetPasswordEmail = {
@@ -91,13 +94,13 @@ let AuthResolvers = class AuthResolvers {
                     TemplateID: 844925,
                     Variables: {
                         fullName: user.fullName,
-                        resetPasswordLink: `${baseUrl}/reset-password/${user.confirmationPasswordToken}`,
+                        resetPasswordLink: `${baseUrl}/reset-password/${user.passwordConfirmationToken}`,
                     },
                     Subject: 'Réinitialisez votre mot de passe'
                 };
-                this.emailService.send([resetPasswordEmail]);
+                yield this.emailService.send([resetPasswordEmail]);
             }
-            return { status: !!user };
+            return { status: true };
         });
     }
     resetPassword(input) {
@@ -105,7 +108,7 @@ let AuthResolvers = class AuthResolvers {
             if (input.password !== input.confirmPassword) {
                 throw new common_1.BadRequestException('api.error.user.password_must_match');
             }
-            const user = yield this.usersService.findOneByConfirmationToken(input.confirmationToken);
+            const user = yield this.usersService.findOneByPasswordConfirmationToken(input.confirmationToken);
             if (!user) {
                 throw new common_1.BadRequestException('api.error.user.wrong_confirm_token');
             }
@@ -163,6 +166,7 @@ AuthResolvers = __decorate([
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         users_service_1.UsersService,
         email_service_1.EmailService,
+        support_service_1.SupportService,
         token_generator_service_1.TokenGeneratorService])
 ], AuthResolvers);
 exports.AuthResolvers = AuthResolvers;

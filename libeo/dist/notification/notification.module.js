@@ -8,12 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const email_service_1 = require("./email.service");
+const zendesk_service_1 = require("./zendesk.service");
+const support_service_1 = require("./support.service");
 let NotificationModule = class NotificationModule {
 };
 NotificationModule = __decorate([
     common_1.Module({
-        providers: [email_service_1.EmailService],
-        exports: [email_service_1.EmailService]
+        providers: [email_service_1.EmailService, zendesk_service_1.ZendeskService, support_service_1.SupportService, common_1.Logger],
+        exports: [email_service_1.EmailService, zendesk_service_1.ZendeskService, support_service_1.SupportService]
     })
 ], NotificationModule);
 exports.NotificationModule = NotificationModule;

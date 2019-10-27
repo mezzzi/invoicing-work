@@ -20,24 +20,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const shortid = require("shortid");
+const uuid = require("uuid");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const invoice_entity_1 = require("../entities/invoice.entity");
 const companies_service_1 = require("./companies.service");
+const company_entity_1 = require("../entities/company.entity");
 const ocr_service_1 = require("../../ocr/ocr.service");
-const files_service_1 = require("./files.service");
 const partners_service_1 = require("./partners.service");
 const ibans_service_1 = require("./ibans.service");
 const email_service_1 = require("../../notification/email.service");
+const payment_entity_1 = require("../entities/payment.entity");
+const invoice_storage_service_1 = require("../../storage/invoice-storage.service");
+const rib_storage_service_1 = require("../../storage/rib-storage.service");
+const zendesk_service_1 = require("../../notification/zendesk.service");
+const zendesk_ticket_interface_1 = require("../../notification/interface/zendesk-ticket.interface");
 let InvoicesService = class InvoicesService {
-    constructor(invoiceRepository, companiesService, partnersService, ibansService, emailService) {
+    constructor(invoiceRepository, paymentsRepository, companiesService, partnersService, ibansService, emailService, invoiceStorageService, ribStorageService, zendeskService) {
         this.invoiceRepository = invoiceRepository;
+        this.paymentsRepository = paymentsRepository;
         this.companiesService = companiesService;
         this.partnersService = partnersService;
         this.ibansService = ibansService;
         this.emailService = emailService;
+        this.invoiceStorageService = invoiceStorageService;
+        this.ribStorageService = ribStorageService;
+        this.zendeskService = zendeskService;
     }
     extractIban(str) {
         const ibanRegex = /([A-Z]{2}[ \-]?[0-9]{2})(?=(?:[ \-]?[A-Z0-9]){9,30}$)((?:[ \-]?[A-Z0-9]{3,5}){2,7})([ \-]?[A-Z0-9]{1,3})?/gm;
@@ -52,26 +61,13 @@ let InvoicesService = class InvoicesService {
     }
     importingInvoice(invoice, file) {
         return __awaiter(this, void 0, void 0, function* () {
-            const path = `companies/${invoice.companyReceiver.id}/invoices`;
-            const fileService = new files_service_1.FileService(file, {
-                dir: `${__dirname}/../../../public/static/${path}`,
-            });
             try {
-                const body = yield fileService.upload();
+                const { fileLocation } = yield this.invoiceStorageService.upload(file, invoice.companyReceiver.id);
                 invoice.status = invoice_entity_1.InvoiceStatus.IMPORTED;
-                if (body.filePath.indexOf('http') !== -1) {
-                    invoice.filepath = body.filePath;
-                }
-                else {
-                    let baseUrl = '//localhost:9000/static/';
-                    if (process.env.DOMAIN) {
-                        baseUrl = `//${process.env.DOMAIN}/static/`;
-                    }
-                    invoice.filepath = `${baseUrl}${path}/${fileService.filename}`;
-                }
+                invoice.filepath = fileLocation;
                 invoice.importAt = new Date();
                 yield invoice.save();
-                yield this.scanningInvoice(invoice, body.filePath);
+                yield this.scanningInvoice(invoice, fileLocation);
             }
             catch (err) {
                 if (invoice.status !== invoice_entity_1.InvoiceStatus.SCANNED) {
@@ -161,14 +157,40 @@ let InvoicesService = class InvoicesService {
             }
         });
     }
+    uploadRib(file, invoiceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!invoiceId) {
+                throw new common_1.BadRequestException('api.error.invoice.missing');
+            }
+            const invoice = yield this.invoiceRepository.findOne({ where: { id: invoiceId } });
+            if (!invoice) {
+                throw new common_1.NotFoundException('api.error.invoice.not_found');
+            }
+            try {
+                const { fileLocation } = yield this.ribStorageService.upload(file, invoice.companyEmitter.id);
+                const claimer = yield this.companiesService.getClaimer(invoice.companyReceiver.id);
+                this.zendeskService.createTicket({
+                    type: zendesk_ticket_interface_1.ZendeskTicketType.TASK,
+                    priority: zendesk_ticket_interface_1.ZendesTicketPriority.URGENT,
+                    requester: { name: claimer.fullName, email: claimer.email },
+                    subject: 'Vérification manuelle RIB',
+                    comment: { body: `L'entreprise ${invoice.companyEmitter.name || invoice.companyEmitter.brandName} a changé son IBAN pour recevoir le paiement de sa facture. Son RIB doit être vérifié manuellement.` },
+                });
+                return fileLocation;
+            }
+            catch (err) {
+                throw new common_1.HttpException(err.message, err.statusCode);
+            }
+        });
+    }
     createInvoice(user, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const file = (data.file) ? yield data.file : null;
+            const file = data.file ? yield data.file : null;
             const invoice = this.invoiceRepository.create();
             invoice.status = invoice_entity_1.InvoiceStatus.IMPORTING;
             invoice.companyReceiver = yield this.companiesService.getCurrentCompanyByUser(user);
             invoice.importedBy = user;
-            invoice.filename = (file) ? file.filename : null;
+            invoice.filename = file ? file.filename : null;
             yield this.invoiceRepository.save(invoice);
             if (data.file) {
                 try {
@@ -178,6 +200,52 @@ let InvoicesService = class InvoicesService {
                     throw new common_1.HttpException(err.message, err.statusCode);
                 }
             }
+            return invoice;
+        });
+    }
+    createOrUpdateAR(user, id, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const companyEmitter = yield this.companiesService.getCurrentCompanyByUser(user);
+            data.companyEmitter = companyEmitter;
+            data.emitterId = user.id;
+            if (data.companyEmitterDetails) {
+                data.companyEmitterDetails.iban =
+                    companyEmitter && companyEmitter.treezorIban;
+            }
+            if (!data.companyReceiverDetails && !data.companyReceiverDetails.siren) {
+                throw new common_1.HttpException('api.error.company.siren', common_1.HttpStatus.BAD_REQUEST);
+            }
+            const companyReceiver = yield this.companiesService.findOneBySiren(data.companyReceiverDetails.siren);
+            if (companyReceiver) {
+                data.companyReceiver = companyReceiver;
+                data.companyReceiverId = companyReceiver.id;
+            }
+            if (data.companyReceiverDetails) {
+                data.companyReceiverDetails.iban =
+                    companyReceiver && companyReceiver.treezorIban;
+            }
+            let invoice;
+            if (id) {
+                invoice = yield this.invoiceRepository.findOne({
+                    id,
+                });
+                if (!invoice) {
+                    throw new common_1.HttpException('api.error.invoice.not_found', common_1.HttpStatus.NOT_FOUND);
+                }
+                if (!data.companyReceiver) {
+                    delete invoice.companyReceiver;
+                }
+                this.invoiceRepository.merge(invoice, data);
+            }
+            else {
+                invoice = yield this.invoiceRepository.create();
+                this.invoiceRepository.merge(invoice, data);
+                if (!data.companyReceiver) {
+                    delete invoice.companyReceiver;
+                }
+                invoice.status = invoice_entity_1.InvoiceStatus.AR_DRAFT;
+            }
+            invoice = yield this.invoiceRepository.save(invoice);
             return invoice;
         });
     }
@@ -194,7 +262,10 @@ let InvoicesService = class InvoicesService {
     }
     updateInvoice(user, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            let invoice = yield this.invoiceRepository.findOne({ id, companyReceiver: user.currentCompany });
+            let invoice = yield this.invoiceRepository.findOne({
+                id,
+                companyReceiver: user.currentCompany,
+            });
             if (!invoice) {
                 throw new common_1.HttpException('api.error.invoice.not_found', common_1.HttpStatus.NOT_FOUND);
             }
@@ -259,9 +330,56 @@ let InvoicesService = class InvoicesService {
             };
         });
     }
+    findByEmitterCompany(company, filters, orderBy, limit, offset) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (filters.status) {
+                filters.status = typeorm_2.In(filters.status);
+            }
+            const whereClause = Object.assign({ companyEmitter: company, enabled: true }, filters);
+            const [invoices, total] = yield this.invoiceRepository.findAndCount({
+                where: whereClause,
+                order: {
+                    createdAt: 'DESC',
+                },
+                take: limit,
+                skip: offset,
+            });
+            return {
+                total,
+                rows: invoices,
+            };
+        });
+    }
     findOneByIdAndCurrentCompany(id, currentCompany) {
         return __awaiter(this, void 0, void 0, function* () {
-            const invoice = yield this.invoiceRepository.findOne({ id, companyReceiver: currentCompany });
+            const invoice = yield this.invoiceRepository.findOne({
+                id,
+                companyReceiver: currentCompany,
+            });
+            if (!invoice) {
+                throw new common_1.HttpException('api.error.invoice.not_found', common_1.HttpStatus.NOT_FOUND);
+            }
+            return invoice;
+        });
+    }
+    findOneByIdAndEmitterCompany(id, currentCompany) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invoice = yield this.invoiceRepository.findOne({
+                id,
+                companyEmitter: currentCompany,
+                enabled: true,
+            });
+            if (!invoice) {
+                throw new common_1.HttpException('api.error.invoice.not_found', common_1.HttpStatus.NOT_FOUND);
+            }
+            return invoice;
+        });
+    }
+    findOneById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invoice = yield this.invoiceRepository.findOne({
+                id,
+            });
             if (!invoice) {
                 throw new common_1.HttpException('api.error.invoice.not_found', common_1.HttpStatus.NOT_FOUND);
             }
@@ -270,7 +388,10 @@ let InvoicesService = class InvoicesService {
     }
     removeInvoice(user, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const invoice = yield this.invoiceRepository.findOne({ id, companyReceiver: user.currentCompany });
+            const invoice = yield this.invoiceRepository.findOne({
+                id,
+                companyReceiver: user.currentCompany,
+            });
             if (!invoice) {
                 throw new common_1.HttpException('api.error.invoice.not_found', common_1.HttpStatus.NOT_FOUND);
             }
@@ -279,24 +400,41 @@ let InvoicesService = class InvoicesService {
             return invoice;
         });
     }
+    removeAll() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invoices = yield this.invoiceRepository.find({});
+            invoices.forEach(invoice => {
+                invoice.enabled = false;
+            });
+            yield this.invoiceRepository.save(invoices);
+            return true;
+        });
+    }
     generateCode(user, invoiceId) {
         return __awaiter(this, void 0, void 0, function* () {
             const invoice = yield this.findOneByIdAndCurrentCompany(invoiceId, user.currentCompany);
             if (invoice.status !== invoice_entity_1.InvoiceStatus.TO_PAY) {
                 throw new common_1.HttpException('api.error.invoice.invalid_status', common_1.HttpStatus.BAD_REQUEST);
             }
-            invoice.code = shortid.generate();
+            invoice.code = uuid
+                .v4()
+                .replace('-', '')
+                .slice(0, 6);
             yield invoice.save();
             const message = {
-                To: [{
+                To: [
+                    {
                         Email: user.email,
                         Name: user.fullName,
-                    }],
+                    },
+                ],
                 TemplateID: 705867,
                 Subject: 'Validez votre paiement',
                 Variables: {
                     invoiceNumber: invoice.number || '',
-                    totalWithVat: (invoice.total) ? `${invoice.total} ${invoice.currency}` : `0 ${invoice.currency}`,
+                    totalWithVat: invoice.total
+                        ? `${invoice.total} ${invoice.currency}`
+                        : `0 ${invoice.currency}`,
                     paymentValidationCode: invoice.code,
                 },
             };
@@ -306,7 +444,10 @@ let InvoicesService = class InvoicesService {
     }
     checkCode(invoiceId, code) {
         return __awaiter(this, void 0, void 0, function* () {
-            const invoice = yield this.invoiceRepository.findOne({ id: invoiceId, code });
+            const invoice = yield this.invoiceRepository.findOne({
+                id: invoiceId,
+                code,
+            });
             if (!invoice) {
                 throw new common_1.HttpException('api.error.invoice.invalid_code', common_1.HttpStatus.BAD_REQUEST);
             }
@@ -335,15 +476,50 @@ let InvoicesService = class InvoicesService {
             return this.invoiceRepository.count(options);
         });
     }
+    findEstimatedBalance(invoice) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (invoice.companyReceiver.provisionningStrategy === company_entity_1.CompanyProvisionningStrategies.AUTOLOAD) {
+                return null;
+            }
+            if (invoice.status !== invoice_entity_1.InvoiceStatus.PLANNED) {
+                return null;
+            }
+            const payments = yield this.paymentsRepository.findOne({ where: { invoice, status: typeorm_2.Not(payment_entity_1.PaymentStatus.CANCELLED) } });
+            if (payments) {
+                return payments.libeoEstimatedBalance;
+            }
+            return null;
+        });
+    }
+    findPaymentAt(invoice) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (invoice.companyReceiver.provisionningStrategy === company_entity_1.CompanyProvisionningStrategies.AUTOLOAD) {
+                return null;
+            }
+            if (invoice.status !== invoice_entity_1.InvoiceStatus.PLANNED) {
+                return null;
+            }
+            const payments = yield this.paymentsRepository.findOne({ where: { invoice, status: typeorm_2.Not(payment_entity_1.PaymentStatus.CANCELLED) } });
+            if (payments) {
+                return payments.paymentAt;
+            }
+            return null;
+        });
+    }
 };
 InvoicesService = __decorate([
     common_1.Injectable(),
     __param(0, typeorm_1.InjectRepository(invoice_entity_1.Invoice)),
+    __param(1, typeorm_1.InjectRepository(payment_entity_1.Payment)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         companies_service_1.CompaniesService,
         partners_service_1.PartnersService,
         ibans_service_1.IbansService,
-        email_service_1.EmailService])
+        email_service_1.EmailService,
+        invoice_storage_service_1.InvoiceStorageService,
+        rib_storage_service_1.RibStorageService,
+        zendesk_service_1.ZendeskService])
 ], InvoicesService);
 exports.InvoicesService = InvoicesService;
 //# sourceMappingURL=invoices.service.js.map

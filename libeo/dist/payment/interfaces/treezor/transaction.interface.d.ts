@@ -1,4 +1,4 @@
-import { ITreezor, SortOrder } from './treezor.interface';
+import { ITreezorBasePayload, SortOrder } from './treezor-base-payload.interface';
 export declare enum TransactionType {
     Payin = "Payin",
     Payout = "Payout",
@@ -25,7 +25,7 @@ export interface ITransaction {
     createdDate: string;
     totalRows: number;
 }
-export interface ITransactionParams extends ITreezor {
+export interface ITransactionParams extends ITreezorBasePayload {
     transactionId?: number;
     transactionType?: TransactionType;
     walletId?: number;

@@ -11,42 +11,57 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mailjet = require("node-mailjet");
 const common_1 = require("@nestjs/common");
 const nestjs_config_1 = require("nestjs-config");
 let EmailService = class EmailService {
-    constructor(configService) {
+    constructor(configService, logger) {
+        this.logger = logger;
         const config = configService.get('mailjet');
         this.mailer = mailjet.connect(config.MAILJET_APIKEY, config.MAILJET_SECRETKEY);
     }
     send(messagesDetail) {
-        const messages = messagesDetail.map(message => {
-            const From = message.From ? message.From : {
-                Email: 'lucas@libeo.io',
-                Name: 'Service Client Libeo',
-            };
-            const TemplateLanguage = message.TemplateLanguage !== undefined ? message.TemplateLanguage : true;
-            return Object.assign({}, message, { From, TemplateErrorReporting: {
-                    Email: 'tech@libeo.io',
-                    Name: 'Mailjet - TemplateErrorReporting'
-                }, TemplateLanguage });
-        });
-        this.mailer
-            .post('send', { version: 'v3.1' })
-            .request({
-            Messages: messages
-        })
-            .catch(err => {
-            const logger = new common_1.Logger();
-            logger.error(err.message);
-            throw new common_1.HttpException('api.error.user.mailjet', err.statusCode);
+        return __awaiter(this, void 0, void 0, function* () {
+            if (process.env.NODE_ENV === 'test')
+                return;
+            const messages = messagesDetail.map(message => {
+                const From = message.From ? message.From : {
+                    Email: 'lucas@libeo.io',
+                    Name: 'Service Client Libeo',
+                };
+                const TemplateLanguage = message.TemplateLanguage !== undefined ? message.TemplateLanguage : true;
+                return Object.assign({}, message, { From, TemplateErrorReporting: {
+                        Email: 'tech@libeo.io',
+                        Name: 'Mailjet - TemplateErrorReporting'
+                    }, TemplateLanguage });
+            });
+            try {
+                yield this.mailer
+                    .post('send', { version: 'v3.1' })
+                    .request({
+                    Messages: messages
+                });
+            }
+            catch (err) {
+                this.logger.error(err.message);
+                throw new common_1.HttpException('api.error.user.mailjet', err.statusCode);
+            }
         });
     }
 };
 EmailService = __decorate([
     __param(0, nestjs_config_1.InjectConfig()),
-    __metadata("design:paramtypes", [nestjs_config_1.ConfigService])
+    __metadata("design:paramtypes", [nestjs_config_1.ConfigService,
+        common_1.Logger])
 ], EmailService);
 exports.EmailService = EmailService;
 //# sourceMappingURL=email.service.js.map

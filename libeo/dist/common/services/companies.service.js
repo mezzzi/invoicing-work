@@ -23,7 +23,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const shortid = require("shortid");
-const Zendesk = require("zendesk-node-api");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
@@ -33,16 +32,26 @@ const partner_entity_1 = require("../entities/partner.entity");
 const email_entity_1 = require("../entities/email.entity");
 const contact_entity_1 = require("../entities/contact.entity");
 const treezor_service_1 = require("../../payment/treezor.service");
-const constants_1 = require("../../constants");
 const accounting_preference_entity_1 = require("../entities/accounting-preference.entity");
+const user_interface_1 = require("../../payment/interfaces/treezor/user.interface");
+const mandate_entity_1 = require("../entities/mandate.entity");
+const bank_account_entity_1 = require("../entities/bank-account.entity");
+const zendesk_service_1 = require("../../notification/zendesk.service");
+const zendesk_ticket_interface_1 = require("../../notification/interface/zendesk-ticket.interface");
+const logo_storage_service_1 = require("../../storage/logo-storage.service");
 let CompaniesService = class CompaniesService {
-    constructor(companyRepository, partnerRepository, contactRepository, emailRepository, accountingPreferenceRepository, sirenService) {
+    constructor(companyRepository, partnerRepository, contactRepository, emailRepository, accountingPreferenceRepository, bankAccountRepository, mandateRepository, sirenService, treezorService, zendeskService, logoStorageService) {
         this.companyRepository = companyRepository;
         this.partnerRepository = partnerRepository;
         this.contactRepository = contactRepository;
         this.emailRepository = emailRepository;
         this.accountingPreferenceRepository = accountingPreferenceRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.mandateRepository = mandateRepository;
         this.sirenService = sirenService;
+        this.treezorService = treezorService;
+        this.zendeskService = zendeskService;
+        this.logoStorageService = logoStorageService;
     }
     createAccountingPreferences(company) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -57,7 +66,7 @@ let CompaniesService = class CompaniesService {
                     key: 'Journal de banque',
                     value: 'BAN',
                     description: null,
-                    type: accounting_preference_entity_1.AccountingPreferenceType.LEDGER_BANK
+                    type: accounting_preference_entity_1.AccountingPreferenceType.LEDGER_BANK,
                 },
                 {
                     enabled: true,
@@ -66,7 +75,7 @@ let CompaniesService = class CompaniesService {
                     key: 'Journal d\'achat',
                     value: 'ACH',
                     description: null,
-                    type: accounting_preference_entity_1.AccountingPreferenceType.LEDGER_PURCHASE
+                    type: accounting_preference_entity_1.AccountingPreferenceType.LEDGER_PURCHASE,
                 },
                 {
                     enabled: true,
@@ -75,7 +84,7 @@ let CompaniesService = class CompaniesService {
                     key: 'Journal de vente',
                     value: 'VEN',
                     description: null,
-                    type: accounting_preference_entity_1.AccountingPreferenceType.LEDGER_SALES
+                    type: accounting_preference_entity_1.AccountingPreferenceType.LEDGER_SALES,
                 },
                 {
                     enabled: true,
@@ -84,7 +93,7 @@ let CompaniesService = class CompaniesService {
                     key: 'Compte TVA déductible',
                     value: '445660',
                     description: null,
-                    type: accounting_preference_entity_1.AccountingPreferenceType.VAT_ACCOUNT
+                    type: accounting_preference_entity_1.AccountingPreferenceType.VAT_ACCOUNT,
                 },
                 {
                     enabled: true,
@@ -93,9 +102,147 @@ let CompaniesService = class CompaniesService {
                     key: 'Compte banque Libeo',
                     value: '512000',
                     description: null,
-                    type: accounting_preference_entity_1.AccountingPreferenceType.BANK_ACCOUNT_TREEZOR
-                }
+                    type: accounting_preference_entity_1.AccountingPreferenceType.BANK_ACCOUNT_TREEZOR,
+                },
             ]);
+        });
+    }
+    delay(ms) {
+        return new Promise(res => setTimeout(res, ms));
+    }
+    createWallet(company) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (company.treezorWalletId) {
+                return company;
+            }
+            try {
+                const wallet = yield this.treezorService.createWallet({
+                    walletTypeId: 10,
+                    userId: company.treezorUserId,
+                    eventName: company.siren,
+                    tariffId: parseInt(process.env.TREEZOR_TARIFFID, 10),
+                    currency: 'EUR',
+                });
+                company.treezorWalletId = wallet.walletId || null;
+                company.treezorIban = wallet.iban || null;
+                company.treezorBic = wallet.bic || null;
+                return company;
+            }
+            catch (err) {
+                throw new common_1.HttpException(err.message, err.statusCode);
+            }
+        });
+    }
+    createMoralUser(company) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (company.treezorUserId) {
+                return company;
+            }
+            try {
+                const [address1] = company.addresses;
+                const user = yield this.treezorService.createUser({
+                    email: `payment.${shortid.generate()}@libeo.io`,
+                    userTypeId: 2,
+                    legalRegistrationNumber: company.siren,
+                    legalTvaNumber: company.vatNumber,
+                    legalName: company.name || company.brandName || '',
+                    legalForm: parseInt(company.legalForm, 10),
+                    legalRegistrationDate: company.incorporationAt,
+                    legalSector: company.naf,
+                    legalNumberOfEmployeeRange: company.numberEmployees || '0',
+                    legalAnnualTurnOver: company.legalAnnualTurnOver,
+                    legalNetIncomeRange: company.legalNetIncomeRange,
+                    phone: (company.phone) ? company.phone : '0000000000',
+                    address1: (address1) ? address1.address1 : null,
+                    city: (address1) ? address1.city : null,
+                    postcode: (address1) ? JSON.stringify(address1.zipcode) : null,
+                    country: 'FR',
+                });
+                company.treezorEmail = user.email || null;
+                company.treezorUserId = user.userId || null;
+                return company;
+            }
+            catch (err) {
+                throw new common_1.HttpException(err.message, err.statusCode);
+            }
+        });
+    }
+    createPhysicalUsers(company) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let users = [];
+            try {
+                const { businessinformations } = yield this.treezorService.getBusinessInformations({
+                    country: 'FR',
+                    registrationNumber: company.siren,
+                });
+                const [info] = businessinformations;
+                if (info && info.users) {
+                    users = info.users;
+                }
+            }
+            catch (err) {
+                throw new common_1.HttpException(err.message, err.statusCode);
+            }
+            const promises = users.map((user) => __awaiter(this, void 0, void 0, function* () {
+                if (user.userTypeId !== 1) {
+                    return null;
+                }
+                try {
+                    return yield this.treezorService.createUser({
+                        firstname: user.firstname || null,
+                        lastname: user.lastname || null,
+                        birthday: user.birthday || null,
+                        occupation: user.parentType || null,
+                        specifiedUSPerson: 0,
+                        parentUserId: company.treezorUserId,
+                        parentType: user_interface_1.UserParentType.LEADER,
+                        email: `payment.${shortid.generate()}@libeo.io`,
+                        userTypeId: 1,
+                    });
+                }
+                catch (err) {
+                    throw new common_1.HttpException(err.message, err.statusCode);
+                }
+            }));
+            try {
+                yield Promise.all(promises);
+            }
+            catch (err) {
+                throw new common_1.HttpException(err.message, err.statusCode);
+            }
+        });
+    }
+    hydrateCompanyWithTreezor(company) {
+        return __awaiter(this, void 0, void 0, function* () {
+            company = yield this.createMoralUser(company);
+            yield company.save();
+            yield this.delay(300);
+            company = yield this.createWallet(company);
+            yield company.save();
+            yield this.createPhysicalUsers(company);
+            return company;
+        });
+    }
+    getClaimer(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const company = yield this.companyRepository.findOne({ where: { id: companyId }, relations: ['claimer'] });
+            if (!company) {
+                throw new common_1.NotFoundException('api.error.company.not_found');
+            }
+            return company.claimer;
+        });
+    }
+    uploadLogo(file, company) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { fileLocation } = yield this.logoStorageService.upload(file, company.id);
+                company.logoUrl = fileLocation;
+                yield company.save();
+                return fileLocation;
+            }
+            catch (err) {
+                throw new common_1.BadRequestException(err.message);
+            }
         });
     }
     createCompanyShell(user) {
@@ -119,6 +266,10 @@ let CompaniesService = class CompaniesService {
                 }
                 myCompany = Object.assign(myCompany, data);
                 yield this.companyRepository.save(myCompany);
+                if (!myCompany.siren) {
+                    const hydratedCompany = yield this.hydrateCompanyWithTreezor(myCompany);
+                    return hydratedCompany;
+                }
                 return myCompany;
             }
             let company = yield this.findOneBySiren(data.siren);
@@ -132,19 +283,19 @@ let CompaniesService = class CompaniesService {
             if (!currentCompany) {
                 company = yield this.companyRepository.create(data);
                 company.claimer = user;
-                yield company.save();
+                company = yield this.hydrateCompanyWithTreezor(company);
                 user.currentCompany = company;
                 yield user.save();
             }
             else if (currentCompany.siren === null) {
                 company = Object.assign(currentCompany, data);
                 company.claimer = user;
-                yield company.save();
+                company = yield this.hydrateCompanyWithTreezor(company);
             }
             else {
                 company = yield this.companyRepository.create(data);
                 company.claimer = user;
-                yield company.save();
+                company = yield this.hydrateCompanyWithTreezor(company);
             }
             const email = new email_entity_1.Email();
             email.email = user.email;
@@ -199,7 +350,10 @@ let CompaniesService = class CompaniesService {
                 return company_entity_1.CompanyStatus.SELF;
             }
             const companyPartner = yield this.findOneBySiren(company.siren);
-            const nbPartners = yield this.partnerRepository.count({ companyInitiator: user.currentCompany, companyPartner });
+            const nbPartners = yield this.partnerRepository.count({
+                companyInitiator: user.currentCompany,
+                companyPartner,
+            });
             if (nbPartners > 0) {
                 return company_entity_1.CompanyStatus.ALREADY;
             }
@@ -211,7 +365,9 @@ let CompaniesService = class CompaniesService {
     }
     findByUser(user, orderBy, limit, offset) {
         return __awaiter(this, void 0, void 0, function* () {
-            const contacts = yield this.contactRepository.find({ user: { id: user.id } });
+            const contacts = yield this.contactRepository.find({
+                user: { id: user.id },
+            });
             if (contacts.length === 0) {
                 return {
                     total: 0,
@@ -227,7 +383,7 @@ let CompaniesService = class CompaniesService {
             const [companies, total] = yield this.companyRepository.findAndCount({
                 where: { id: typeorm_2.In(companyIds) },
                 take: limit,
-                skip: offset
+                skip: offset,
             });
             return {
                 total,
@@ -262,36 +418,27 @@ let CompaniesService = class CompaniesService {
                 signedAt: new Date(),
             };
             yield company.save();
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
-            const { users } = yield treezor.getBeneficiaries({
+            const { users } = yield this.treezorService.getBeneficiaries({
                 userTypeId: 1,
                 userStatus: 'VALIDATED',
                 parentUserId: company.treezorUserId,
             });
             let sendKyc = true;
             users.forEach((physicalUser) => {
-                if (physicalUser.country === 'US' || physicalUser.birthCountry === 'US' || physicalUser.nationality === 'US') {
+                if (physicalUser.country === 'US' ||
+                    physicalUser.birthCountry === 'US' ||
+                    physicalUser.nationality === 'US') {
                     sendKyc = false;
                 }
             });
             if (!sendKyc) {
                 company = yield this.companyRepository.findOne({ where: { id: company.id }, relations: ['claimer'] });
-                const zendesk = new Zendesk({
-                    url: process.env.ZENDESK_API_URL,
-                    email: process.env.ZENDESK_API_EMAIL,
-                    token: process.env.ZENDESK_API_TOKEN,
-                });
-                zendesk.tickets.create({
-                    type: 'incident',
-                    priority: 'hight',
+                yield this.zendeskService.createTicket({
+                    type: zendesk_ticket_interface_1.ZendeskTicketType.INCIDENT,
+                    priority: zendesk_ticket_interface_1.ZendesTicketPriority.HIGH,
                     requester: { name: company.claimer.fullName, email: company.claimer.email },
                     subject: 'KYC FATCA',
                     comment: { body: `Le KYC necessite des documents complémentaires pour l'entreprise ${company.name}` },
-                    custom_fields: [constants_1.environmentZendesk],
                 });
             }
             return true;
@@ -301,15 +448,10 @@ let CompaniesService = class CompaniesService {
         return __awaiter(this, void 0, void 0, function* () {
             const company = user.currentCompany;
             if (!company) {
-                throw new common_1.HttpException('api.error.company.not_found', common_1.HttpStatus.NOT_FOUND);
+                throw new common_1.NotFoundException('api.error.company.not_found');
             }
             const { documents } = data;
             let beneficiary = null;
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             data.userTag = {};
             if (data.isCurrentUser) {
                 data.userTag.userId = user.id;
@@ -330,10 +472,12 @@ let CompaniesService = class CompaniesService {
                 data.email = `payment.${shortid.generate()}@libeo.io`;
             }
             try {
-                beneficiary = (data.userId) ? yield treezor.updateUser(data) : yield treezor.createUser(data);
+                beneficiary = data.userId
+                    ? yield this.treezorService.updateUser(data)
+                    : yield this.treezorService.createUser(data);
             }
             catch (err) {
-                throw new common_1.HttpException(err.message, common_1.HttpStatus.BAD_GATEWAY);
+                throw new common_1.BadRequestException(err.message, err);
             }
             if (taxResidence) {
                 data.taxResidence = yield this.createOrUpdateTaxResidence(beneficiary.userId, taxResidence, beneficiary.country);
@@ -343,27 +487,21 @@ let CompaniesService = class CompaniesService {
             }
             const promiseDocuments = documents.map(document => {
                 document.userId = beneficiary.userId;
-                return treezor.createDocument(document);
+                return this.treezorService.createDocument(document);
             });
             try {
                 beneficiary.documents = yield Promise.all(promiseDocuments);
             }
             catch (err) {
-                throw new common_1.HttpException(err.message, common_1.HttpStatus.BAD_GATEWAY);
+                throw new common_1.BadRequestException(err.message, err);
             }
             return beneficiary;
         });
     }
     removeBeneficiary(company, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-                userId: company.treezorUserId,
-            });
             try {
-                return yield treezor.removeUser({ userId, origin: 'USER' });
+                return yield this.treezorService.removeUser({ userId, origin: 'USER' });
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, common_1.HttpStatus.BAD_GATEWAY);
@@ -372,13 +510,8 @@ let CompaniesService = class CompaniesService {
     }
     getTaxResidence(userId, country) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                return yield treezor.getTaxResidence(userId, country);
+                return yield this.treezorService.getTaxResidence(userId, country);
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, err.statusCode);
@@ -388,39 +521,36 @@ let CompaniesService = class CompaniesService {
     createOrUpdateTaxResidence(userId, taxPayerId, country) {
         return __awaiter(this, void 0, void 0, function* () {
             let taxResidence = null;
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                taxResidence = yield treezor.getTaxResidence(userId, country);
+                taxResidence = yield this.treezorService.getTaxResidence(userId, country);
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, err.statusCode);
             }
             if (!taxResidence) {
                 try {
-                    taxResidence = yield treezor.createTaxResidence({
+                    taxResidence = yield this.treezorService.createTaxResidence({
                         country,
-                        taxPayerId: (taxPayerId) ? taxPayerId : null,
+                        taxPayerId: taxPayerId ? taxPayerId : null,
                         userId,
-                        liabilityWaiver: (!taxPayerId) ? true : false,
+                        liabilityWaiver: !taxPayerId ? true : false,
                     });
                 }
                 catch (err) {
                     throw new common_1.HttpException(err.message, err.statusCode);
                 }
             }
-            taxPayerId = (taxPayerId) ? taxPayerId : '';
-            if (taxResidence && (taxResidence.taxPayerId !== taxPayerId || taxResidence.country !== country)) {
+            taxPayerId = taxPayerId ? taxPayerId : '';
+            if (taxResidence &&
+                (taxResidence.taxPayerId !== taxPayerId ||
+                    taxResidence.country !== country)) {
                 try {
-                    taxResidence = yield treezor.updateTaxResidence({
+                    taxResidence = yield this.treezorService.updateTaxResidence({
                         taxResidenceId: taxResidence.id,
                         country,
-                        taxPayerId: (taxPayerId) ? taxPayerId : null,
+                        taxPayerId: taxPayerId ? taxPayerId : null,
                         userId,
-                        liabilityWaiver: (!taxPayerId) ? true : false,
+                        liabilityWaiver: !taxPayerId ? true : false,
                     });
                 }
                 catch (err) {
@@ -432,13 +562,8 @@ let CompaniesService = class CompaniesService {
     }
     removeDocument(documentId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                return yield treezor.deleteDocument(documentId);
+                return yield this.treezorService.deleteDocument(documentId);
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, err.statusCode);
@@ -454,13 +579,8 @@ let CompaniesService = class CompaniesService {
                 };
             }
             let info = null;
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                const { businessinformations } = yield treezor.getBusinessInformations({
+                const { businessinformations, } = yield this.treezorService.getBusinessInformations({
                     country: 'FR',
                     registrationNumber: company.siren,
                 });
@@ -492,14 +612,8 @@ let CompaniesService = class CompaniesService {
                     rows: [],
                 };
             }
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-                userId: company.treezorUserId,
-            });
             try {
-                const { users } = yield treezor.getBeneficiaries({
+                const { users } = yield this.treezorService.getBeneficiaries({
                     userTypeId: 1,
                     userStatus: 'VALIDATED',
                     parentUserId: company.treezorUserId,
@@ -516,13 +630,8 @@ let CompaniesService = class CompaniesService {
     }
     getDocuments(userId, limit, page) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                const { documents } = yield treezor.getDocuments({
+                const { documents } = yield this.treezorService.getDocuments({
                     userId,
                     pageCount: limit,
                     pageNumber: page,
@@ -560,28 +669,54 @@ let CompaniesService = class CompaniesService {
     }
     getCompanyComplementaryInfos(siren) {
         return __awaiter(this, void 0, void 0, function* () {
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                const { businessinformations } = yield treezor.getBusinessInformations({
+                const { businessinformations, } = yield this.treezorService.getBusinessInformations({
                     country: 'FR',
                     registrationNumber: siren,
                 });
                 const [info] = businessinformations;
-                return {
+                const complementaryInfos = {
                     capital: Number(info.legalShareCapital) || null,
                     legalAnnualTurnOver: info.legalAnnualTurnOver || null,
                     numberEmployees: info.legalNumberOfEmployeeRange || null,
                     legalNetIncomeRange: info.legalNetIncomeRange || null,
                     phone: (info.phone) ? info.phone.split(' ').join('') : null,
+                    addresses: {
+                        total: 1,
+                        rows: [{
+                                siret: (info.legalRegistrationNumber) ? info.legalRegistrationNumber.slice(0, 9) : null,
+                                address1: info.address1 || null,
+                                address2: null,
+                                zipcode: info.postcode || null,
+                                city: info.city || null,
+                                country: 'France',
+                            }],
+                    }
                 };
+                return complementaryInfos;
             }
             catch (err) {
                 throw new common_1.HttpException(err.message, err.statusCode);
             }
+        });
+    }
+    getSignedMandate(company) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const bankAccount = yield this.bankAccountRepository.findOne({
+                company,
+                default: true,
+            });
+            if (!bankAccount) {
+                throw new Error('Bank account not found');
+            }
+            const mandate = yield this.mandateRepository.findOne({
+                bankAccount,
+                status: mandate_entity_1.MandateStatus.SIGNED,
+            });
+            if (!mandate) {
+                throw new Error('Mandate not found');
+            }
+            return mandate;
         });
     }
 };
@@ -592,12 +727,19 @@ CompaniesService = __decorate([
     __param(2, typeorm_1.InjectRepository(contact_entity_1.Contact)),
     __param(3, typeorm_1.InjectRepository(email_entity_1.Email)),
     __param(4, typeorm_1.InjectRepository(accounting_preference_entity_1.AccountingPreference)),
+    __param(5, typeorm_1.InjectRepository(bank_account_entity_1.BankAccount)),
+    __param(6, typeorm_1.InjectRepository(mandate_entity_1.Mandate)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        siren_service_1.SirenService])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        siren_service_1.SirenService,
+        treezor_service_1.TreezorService,
+        zendesk_service_1.ZendeskService,
+        logo_storage_service_1.LogoStorageService])
 ], CompaniesService);
 exports.CompaniesService = CompaniesService;
 //# sourceMappingURL=companies.service.js.map

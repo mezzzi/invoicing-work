@@ -12,6 +12,7 @@ const fs = require("fs");
 const url = require("url");
 const https = require("https");
 const rp = require("request-promise-native");
+const path = require("path");
 class JenjiStrategy {
     constructor(config) {
         this.config = config;
@@ -21,19 +22,21 @@ class JenjiStrategy {
     }
     loadFile(filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (filePath.indexOf('http') !== -1) {
+            if (filePath.indexOf('http://localhost') !== -1) {
+                const localFilePath = filePath.replace('http://localhost:9000/static/', '');
+                const completeFilePath = path.join(process.cwd(), '/public/static', localFilePath.substring(1, localFilePath.length));
+                return new Promise((resolve, reject) => {
+                    this.file = fs.createReadStream(completeFilePath);
+                    this.file.on('open', resolve);
+                    this.file.on('error', reject);
+                });
+            }
+            else {
                 return new Promise((resolve, reject) => {
                     https.get(filePath, res => {
                         this.file = res;
                         resolve();
                     });
-                });
-            }
-            else {
-                return new Promise((resolve, reject) => {
-                    this.file = fs.createReadStream(filePath);
-                    this.file.on('ready', resolve);
-                    this.file.on('error', reject);
                 });
             }
         });

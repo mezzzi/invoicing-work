@@ -1,28 +1,28 @@
-import { Col, Icon, message, Row, Upload } from 'antd';
-import { Form } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
-import ApolloClient from 'apollo-client';
-import * as React from 'react';
-import { compose, withApollo } from 'react-apollo';
-import { isMobile } from 'react-device-detect';
-import { FormattedMessage } from 'react-intl';
+import { Col, Icon, message, Row, Upload } from "antd";
+import { Form } from "antd";
+import { FormComponentProps } from "antd/lib/form";
+import ApolloClient from "apollo-client";
+import * as React from "react";
+import { compose, withApollo } from "react-apollo";
+import { isMobile } from "react-device-detect";
+import { FormattedMessage } from "react-intl";
 
-import { createOrUpdateCompany } from 'context/Company/queries';
+import { createOrUpdateCompany } from "context/Company/queries";
 
-import { Icon as MyIcon } from 'components/Assets';
-import { IconValue } from 'components/Assets/Icon';
-import { Button } from 'components/Button';
-import { DynamicSelectBox, SelectBox } from 'components/Invoicing';
+import { Icon as MyIcon } from "components/Assets";
+import { IconValue } from "components/Assets/Icon";
+import { Button } from "components/Button";
+import { DynamicSelectBox, SelectBox } from "components/Invoicing";
 
-import { CollapseCard } from 'components/Invoicing/Card';
+import { CollapseCard } from "components/Invoicing/Card";
 
-import { ICompany, IContact, IHeaderInfo } from 'components/Invoicing/types';
-import { IContact as IDetailedContact } from 'context/Contacts/types.d';
-import * as AutoSave from 'screens/Invoicing/contexts/AutoSave';
+import { ICompany, IContact, IHeaderInfo } from "components/Invoicing/types";
+import { IContact as IDetailedContact } from "context/Contacts/types.d";
+import * as AutoSave from "screens/Invoicing/contexts/AutoSave";
 
-import { UploadFile } from 'antd/lib/upload/interface';
+import { UploadFile } from "antd/lib/upload/interface";
 
-import LocalUpload from 'components/Form/LocalUpload';
+import LocalUpload from "components/Form/LocalUpload";
 
 interface IProps extends FormComponentProps, AutoSave.InjectedProps {
   client: ApolloClient<any>;
@@ -46,7 +46,7 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
   autoSave() {
     const { updateInvoiceData } = this.props;
     updateInvoiceData({
-      headerInfo: { ...this.state },
+      headerInfo: { ...this.state }
     });
   }
 
@@ -55,7 +55,7 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
   };
 
   onRemoveLogoUrl = (uuid: string) => {
-    this.autoSaveLogoUrl('');
+    this.autoSaveLogoUrl("");
   };
 
   autoSaveLogoUrl = async (logoUrl: string) => {
@@ -65,22 +65,22 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
     }
     const { updateInvoiceData, getAutoSavedData } = this.props;
     const fixedUrl =
-      'https://www.libeo.io/wp-content/uploads/2019/02/cropped-Plan-de-travail-1-copy-3.png';
+      "https://www.libeo.io/wp-content/uploads/2019/02/cropped-Plan-de-travail-1-copy-3.png";
     const { client } = this.props;
-    const { emitterCompany: { id } = { id: 'fakeId' } } = getAutoSavedData();
+    const { emitterCompany: { id } = { id: "fakeId" } } = getAutoSavedData();
     this.setState({
-      logoUrl,
+      logoUrl
     });
     const { data, errors } = await client.mutate({
       mutation: createOrUpdateCompany,
-      variables: { id, input: { logoUrl: fixedUrl } },
+      variables: { id, input: { logoUrl: fixedUrl } }
     });
   };
 
   getAutoSavedUrl = () => {
     const { getAutoSavedData } = this.props;
     const {
-      headerInfo: { logoUrl } = { logoUrl: undefined },
+      headerInfo: { logoUrl } = { logoUrl: undefined }
     } = getAutoSavedData();
     return logoUrl;
   };
@@ -93,15 +93,15 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
       currentCompany.contacts &&
       currentCompany.contacts.rows.map(
         ({ id, firstname, lastname, emails }: IDetailedContact) => ({
-          email: emails ? emails.rows[0].email : '',
+          email: emails ? emails.rows[0].email : "",
           firstname,
           id,
-          lastname,
-        }),
+          lastname
+        })
       );
     if (headerInfo) {
       this.state = {
-        ...headerInfo,
+        ...headerInfo
       };
     }
   };
@@ -110,27 +110,27 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
     if (this.emitterContacts) {
       const contact = this.emitterContacts.find(({ id }: any) => id === value);
       this.setState({
-        contact,
+        contact
       });
     }
   };
 
   documentTypeChanged = (value: any, option: any) =>
     this.setState({
-      documentType: value,
+      documentType: value
     });
 
   render() {
     const { getAutoSavedData, form } = this.props;
     const {
       emitterCompany: { name, siret, vatNumber, address1, address2 } = {
-        address1: '',
-        address2: '',
-        name: '',
-        siret: '',
-        vatNumber: '',
+        address1: "",
+        address2: "",
+        name: "",
+        siret: "",
+        vatNumber: ""
       },
-      currentCompany,
+      currentCompany
     } = getAutoSavedData();
 
     const { documentType, contact, logoUrl } = this.state;
@@ -140,8 +140,8 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
         <CollapseCard
           shadow
           title={<FormattedMessage id="invoicing.detail.header.title" />}
-          className={'invoicing-header'}
-          titleAlign={'left'}
+          className={"invoicing-header"}
+          titleAlign={"left"}
           collapsable
         >
           <Row>
@@ -153,15 +153,15 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
             >
               <div
                 className={`upload-second-logo square ${
-                  isMobile ? 'bottom-space' : ''
+                  isMobile ? "bottom-space" : ""
                 }`}
               >
                 <div
                   style={{
-                    height: '100%',
-                    maxHeight: '180px',
-                    objectFit: 'contain',
-                    width: '100%',
+                    height: "100%",
+                    maxHeight: "180px",
+                    objectFit: "contain",
+                    width: "100%"
                   }}
                 >
                   <LocalUpload
@@ -182,7 +182,7 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
               <div>
                 <div
                   className={`upload-second-logo normal ${
-                    isMobile ? 'bottom-space' : ''
+                    isMobile ? "bottom-space" : ""
                   }`}
                 >
                   <span>{name}</span>
@@ -205,18 +205,21 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
               md={{ span: 9, offset: 1 }}
               className="selection-group"
             >
-              <DynamicSelectBox
-                defaultValue={contact && contact.email}
-                id="select1"
-                onChangeSelect={this.contactChanged}
-                displayKey={'email'}
-                title={
-                  <FormattedMessage id="invoicing.detail.header.dropdown1.title" />
-                }
-                placeholder="Lucas de Vries"
-                options={this.emitterContacts}
-                form={form}
-              />
+              {this.emitterContacts && (
+                <DynamicSelectBox
+                  defaultValue={contact && contact.email}
+                  id="select1"
+                  onChangeSelect={this.contactChanged}
+                  displayKey={"email"}
+                  title={
+                    <FormattedMessage id="invoicing.detail.header.dropdown1.title" />
+                  }
+                  placeholder="Lucas de Vries"
+                  options={this.emitterContacts}
+                  form={form}
+                />
+              )}
+
               <SelectBox
                 defaultValue={documentType}
                 id="select2"
@@ -225,7 +228,7 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
                   <FormattedMessage id="invoicing.detail.header.dropdown2.title" />
                 }
                 placeholder="Select the documentType type"
-                options={['Invoice', 'Quote']}
+                options={["Invoice", "Quote"]}
                 form={form}
               />
             </Col>
@@ -239,5 +242,5 @@ class HeaderCard extends React.PureComponent<IProps, IState> {
 export default compose(
   Form.create({}),
   AutoSave.hoc(),
-  withApollo,
+  withApollo
 )(HeaderCard);

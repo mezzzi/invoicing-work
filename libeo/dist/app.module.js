@@ -18,6 +18,25 @@ const auth_module_1 = require("./auth/auth.module");
 const common_module_1 = require("./common/common.module");
 const naming_strategy_1 = require("./naming-strategy");
 const notification_module_1 = require("./notification/notification.module");
+const getConnectionOptions = () => {
+    if (process.env.NODE_ENV === 'test') {
+        return {
+            type: 'sqljs',
+            dropSchema: true,
+            location: path_1.resolve(__dirname, '../e2e', 'libeo.db'),
+            namingStrategy: new naming_strategy_1.CamelNamingStrategy(),
+        };
+    }
+    return {
+        type: 'postgres',
+        host: process.env.DATABASE_HOST,
+        port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+        username: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD,
+        database: process.env.DATABASE_NAME,
+        namingStrategy: new naming_strategy_1.SnakeNamingStrategy(),
+    };
+};
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
@@ -29,35 +48,16 @@ AppModule = __decorate([
     common_1.Module({
         imports: [
             nestjs_config_1.ConfigModule.load(path_1.resolve(__dirname, 'config', '**', '!(*.d).{ts,js}')),
-            nest_raven_1.RavenModule.forRoot(process.env.SENTRY_DSN),
+            nest_raven_1.RavenModule,
             typeorm_1.TypeOrmModule.forRootAsync({
                 useFactory: (config) => {
-                    let connectionOptions = null;
+                    const connectionOptions = getConnectionOptions();
                     const defaultConnectionOptions = {
                         logging: (process.env.TYPEORM_LOGGING === 'true'),
                         entities: [path_1.resolve(__dirname, '**/*.entity{.ts,.js}')],
                         subscribers: [path_1.resolve(__dirname, '**/*.subscriber{.ts,.js}')],
                         synchronize: (process.env.TYPEORM_SYNCHRONIZE === 'true'),
                     };
-                    if (process.env.NODE_ENV === 'test') {
-                        connectionOptions = {
-                            type: 'sqljs',
-                            dropSchema: true,
-                            location: path_1.resolve(__dirname, '../e2e', 'libeo.db'),
-                            namingStrategy: new naming_strategy_1.CamelNamingStrategy(),
-                        };
-                    }
-                    else {
-                        connectionOptions = {
-                            type: 'postgres',
-                            host: process.env.DATABASE_HOST,
-                            port: parseInt(process.env.DATABASE_PORT, 10),
-                            username: process.env.DATABASE_USER,
-                            password: process.env.DATABASE_PASSWORD,
-                            database: process.env.DATABASE_NAME,
-                            namingStrategy: new naming_strategy_1.SnakeNamingStrategy(),
-                        };
-                    }
                     return Object.assign(defaultConnectionOptions, connectionOptions);
                 },
                 inject: [nestjs_config_1.ConfigService],
@@ -73,7 +73,7 @@ AppModule = __decorate([
         providers: [
             {
                 provide: core_1.APP_INTERCEPTOR,
-                useClass: nest_raven_1.RavenInterceptor(),
+                useValue: new nest_raven_1.RavenInterceptor(),
             },
         ],
     })

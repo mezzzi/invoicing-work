@@ -14,11 +14,11 @@ export declare class UsersService {
     createUser(data: CreateUserDto): Promise<User>;
     findMyCompanyByUser(user: User): Promise<Company>;
     findOneByEmail(email: string): Promise<User>;
-    findOneByConfirmationToken(confirmationToken: string): Promise<User>;
+    findOneByPasswordConfirmationToken(passwordConfirmationToken: string): Promise<User>;
     updatePassword(user: User, newPassword: string): Promise<void>;
     getHash(password: string | undefined): Promise<string>;
     compareHash(password: string | undefined, hash: string | undefined): Promise<boolean>;
     confirmationToken(user: User, baseUrl: string): Promise<User>;
-    activationUser(confirmationToken: string): Promise<boolean>;
+    activateUser(confirmationToken: string): Promise<boolean>;
     updateUser(user: User, data: UpdateUserDto): Promise<User>;
 }

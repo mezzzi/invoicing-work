@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -17,6 +20,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const treezor_service_1 = require("../../payment/treezor.service");
 let TransactionsService = class TransactionsService {
+    constructor(treezorService) {
+        this.treezorService = treezorService;
+    }
     findByCompany(company, limit, page) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!company || !company.treezorWalletId) {
@@ -26,13 +32,8 @@ let TransactionsService = class TransactionsService {
                 };
             }
             let transactions = [];
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                const result = yield treezor.getTransactions({ walletId: company.treezorWalletId, pageNumber: page, pageCount: limit });
+                const result = yield this.treezorService.getTransactions({ walletId: company.treezorWalletId, pageNumber: page, pageCount: limit });
                 transactions = result.transactions;
             }
             catch (err) {
@@ -46,7 +47,8 @@ let TransactionsService = class TransactionsService {
     }
 };
 TransactionsService = __decorate([
-    common_1.Injectable()
+    common_1.Injectable(),
+    __metadata("design:paramtypes", [treezor_service_1.TreezorService])
 ], TransactionsService);
 exports.TransactionsService = TransactionsService;
 //# sourceMappingURL=transactions.service.js.map

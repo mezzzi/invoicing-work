@@ -4,6 +4,8 @@ export declare class CreateOrUpdateCompanyDto {
     siret?: string;
     name?: string;
     brandName?: string;
+    templatePreference: number;
+    logoUrl: string;
     slogan?: string;
     domainName?: string;
     naf?: string;

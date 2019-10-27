@@ -13,10 +13,11 @@ const typeorm_1 = require("typeorm");
 const invoice_entity_1 = require("./invoice.entity");
 const user_entity_1 = require("./user.entity");
 const base_entity_1 = require("./base.entity");
+const payin_entity_1 = require("./payin.entity");
 var PaymentStatus;
 (function (PaymentStatus) {
     PaymentStatus["REQUESTED"] = "REQUESTED";
-    PaymentStatus["SENT_TO_TREEZOR"] = "SENT_TO_TREEZOR";
+    PaymentStatus["BEING_PROCESSED"] = "BEING_PROCESSED";
     PaymentStatus["TREEZOR_PENDING"] = "TREEZOR_PENDING";
     PaymentStatus["TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE"] = "TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE";
     PaymentStatus["TREEZOR_SYNC_KO_MISC"] = "TREEZOR_SYNC_KO_MISC";
@@ -27,7 +28,7 @@ var PaymentStatus;
 })(PaymentStatus = exports.PaymentStatus || (exports.PaymentStatus = {}));
 exports.getStatusLibeoBalance = [
     PaymentStatus.REQUESTED,
-    PaymentStatus.SENT_TO_TREEZOR,
+    PaymentStatus.BEING_PROCESSED,
     PaymentStatus.TREEZOR_SYNC_KO_NOT_ENOUGH_BALANCE,
     PaymentStatus.TREEZOR_SYNC_KO_MISC,
     PaymentStatus.TREEZOR_WH_KO_NOT_ENOUGH_BALANCE,
@@ -91,6 +92,11 @@ __decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", Number)
 ], Payment.prototype, "treezorBeneficiaryId", void 0);
+__decorate([
+    typeorm_1.OneToOne(type => payin_entity_1.Payin, { onDelete: 'SET NULL' }),
+    typeorm_1.JoinColumn(),
+    __metadata("design:type", payin_entity_1.Payin)
+], Payment.prototype, "payin", void 0);
 Payment = __decorate([
     typeorm_1.Entity()
 ], Payment);

@@ -439,7 +439,7 @@ export declare abstract class IMutation {
     abstract payout(invoiceId: string, date?: string, code?: string): Invoice | Promise<Invoice>;
     abstract payoutContacts(invoiceId: string, contactIds?: string[]): boolean | Promise<boolean>;
     abstract refreshConfirmationTokenUser(email: string): User | Promise<User>;
-    abstract activationUser(confirmationToken: string): boolean | Promise<boolean>;
+    abstract activateUser(confirmationToken: string): boolean | Promise<boolean>;
 }
 export declare class Partner {
     id?: string;

@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
+exports.PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\!\"\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\`\{\|\}\~])(?=.{8,})/;
 class SignUpPayload {
 }
 __decorate([
@@ -29,12 +30,12 @@ __decorate([
 ], SignUpPayload.prototype, "email", void 0);
 __decorate([
     class_validator_1.IsNotEmpty(),
-    class_validator_1.Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\!\"\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\`\{\|\}\~])(?=.{8,})/),
+    class_validator_1.Matches(exports.PASSWORD_PATTERN),
     __metadata("design:type", String)
 ], SignUpPayload.prototype, "password", void 0);
 __decorate([
     class_validator_1.IsNotEmpty(),
-    class_validator_1.Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\!\"\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\`\{\|\}\~])(?=.{8,})/),
+    class_validator_1.Matches(exports.PASSWORD_PATTERN),
     __metadata("design:type", String)
 ], SignUpPayload.prototype, "passwordConfirmation", void 0);
 exports.SignUpPayload = SignUpPayload;

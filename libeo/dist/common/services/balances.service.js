@@ -28,22 +28,18 @@ const payment_repository_1 = require("../repositories/payment.repository");
 const typeorm_1 = require("@nestjs/typeorm");
 const payment_entity_1 = require("../entities/payment.entity");
 let BalancesService = class BalancesService {
-    constructor(invoicesService, paymentRepository) {
+    constructor(invoicesService, paymentRepository, treezorService) {
         this.invoicesService = invoicesService;
         this.paymentRepository = paymentRepository;
+        this.treezorService = treezorService;
     }
     getBalance(company) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!company || !company.treezorWalletId) {
                 return null;
             }
-            const treezor = new treezor_service_1.TreezorService({
-                baseUrl: process.env.TREEZOR_API_URL,
-                token: process.env.TREEZOR_TOKEN,
-                secretKey: process.env.TREEZOR_SECRET_KEY,
-            });
             try {
-                const { balances } = yield treezor.getBalances({ walletId: company.treezorWalletId });
+                const { balances } = yield this.treezorService.getBalances({ walletId: company.treezorWalletId });
                 const [balance] = balances;
                 return balance;
             }
@@ -70,12 +66,42 @@ let BalancesService = class BalancesService {
             return false;
         });
     }
+    updateLibeoBalance(company, currentPayment) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [balance, payments] = yield Promise.all([
+                this.getBalance(company),
+                this.paymentRepository.getPlannedPayments(company, (currentPayment) ? currentPayment.paymentAt : null),
+            ]);
+            let calculationLibeoBalance = Number(balance.authorizedBalance);
+            if (currentPayment) {
+                calculationLibeoBalance = yield this.calculationLibeoBalance(balance, currentPayment.paymentAt, company);
+                currentPayment.libeoEstimatedBalance = calculationLibeoBalance;
+                yield currentPayment.save();
+                if (calculationLibeoBalance < 0) {
+                    return;
+                }
+            }
+            try {
+                yield Promise.all(payments.map((payment) => {
+                    payment.libeoEstimatedBalance = calculationLibeoBalance - payment.amount;
+                    if (payment.libeoEstimatedBalance > 0) {
+                        calculationLibeoBalance = payment.libeoEstimatedBalance;
+                    }
+                    return payment.save();
+                }));
+            }
+            catch (err) {
+                throw new common_1.HttpException(err.message, common_1.HttpStatus.BAD_REQUEST);
+            }
+        });
+    }
 };
 BalancesService = __decorate([
     common_1.Injectable(),
     __param(1, typeorm_1.InjectRepository(payment_repository_1.PaymentRepository)),
     __metadata("design:paramtypes", [invoices_service_1.InvoicesService,
-        payment_repository_1.PaymentRepository])
+        payment_repository_1.PaymentRepository,
+        treezor_service_1.TreezorService])
 ], BalancesService);
 exports.BalancesService = BalancesService;
 //# sourceMappingURL=balances.service.js.map

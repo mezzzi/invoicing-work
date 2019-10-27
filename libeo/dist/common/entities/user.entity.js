@@ -57,11 +57,11 @@ __decorate([
 __decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
-], User.prototype, "confirmationToken", void 0);
+], User.prototype, "emailConfirmationToken", void 0);
 __decorate([
     typeorm_1.Column({ nullable: true }),
     __metadata("design:type", String)
-], User.prototype, "confirmationPasswordToken", void 0);
+], User.prototype, "passwordConfirmationToken", void 0);
 __decorate([
     typeorm_1.Column(),
     __metadata("design:type", Date)

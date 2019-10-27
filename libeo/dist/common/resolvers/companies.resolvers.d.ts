@@ -7,6 +7,7 @@ import { IDocument } from '../../payment/interfaces/treezor/document.interface';
 import { InvoicesService } from '../services/invoices.service';
 import { IComplementaryInfos } from '../interfaces/company.interface';
 import { IbansService } from '../services/ibans.service';
+import { File } from '../interfaces/file.interface';
 export declare class CompaniesResolvers {
     private readonly companiesService;
     private readonly addressesService;
@@ -19,6 +20,7 @@ export declare class CompaniesResolvers {
     updateKycStatus(ctx: any, status: CompanyKycStatus): Promise<Company>;
     removeDocument(id: number): Promise<IDocument>;
     updateKycStep(ctx: any, step: string): Promise<Company>;
+    uploadLogo(ctx: any, file: File): Promise<string>;
     searchCompanies(query: string, orderBy?: string, limit?: number, offset?: number): Promise<List>;
     company(ctx: any): Promise<Company>;
     contract(ctx: any): Promise<string>;

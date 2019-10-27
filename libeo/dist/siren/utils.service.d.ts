@@ -1,8 +1,6 @@
-export declare enum Type {
+export declare enum SearchCompaniesType {
     SIRET = "siret",
     SIREN = "siren",
     QUERY = "raisonSociale"
 }
-export declare class Utils {
-    getPrefix(str: string): string;
-}
+export declare const getPrefixTypeSearchCompanies: (str: string) => SearchCompaniesType;

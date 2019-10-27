@@ -1,4 +1,4 @@
-// import { join } from 'path';
+import { join } from 'path';
 import { GraphQLUpload } from 'graphql-upload';
 import { GqlModuleOptions } from '@nestjs/graphql';
 
@@ -10,7 +10,7 @@ const graphqlConfig: GqlModuleOptions = {
   // },
   installSubscriptionHandlers: true,
   resolvers: { Upload: GraphQLUpload },
-  debug: (process.env.GRAPHQL_DEBUG === 'true'),
+  debug: (process.env.GRAPHQL_DEBUG === 'false'),
   playground: (process.env.GRAPHQL_PLAYGROUND === 'true'),
   context: ({ req }) => ({ req }),
 };

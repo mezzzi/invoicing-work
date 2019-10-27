@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
+const signup_dto_1 = require("./signup.dto");
 class SendPasswordResetEmail {
 }
 __decorate([
@@ -26,10 +27,12 @@ __decorate([
 ], ResetPasswordPayload.prototype, "confirmationToken", void 0);
 __decorate([
     class_validator_1.IsNotEmpty(),
+    class_validator_1.Matches(signup_dto_1.PASSWORD_PATTERN),
     __metadata("design:type", String)
 ], ResetPasswordPayload.prototype, "password", void 0);
 __decorate([
     class_validator_1.IsNotEmpty(),
+    class_validator_1.Matches(signup_dto_1.PASSWORD_PATTERN),
     __metadata("design:type", String)
 ], ResetPasswordPayload.prototype, "confirmPassword", void 0);
 exports.ResetPasswordPayload = ResetPasswordPayload;

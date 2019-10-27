@@ -81,7 +81,7 @@ let IbansService = class IbansService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const res = yield rp({
-                    uri: `${process.env.IBAN_API_URL}/validate_iban_dummy/${iban}`,
+                    uri: `${process.env.IBAN_API_URL}/${process.env.IBAN_API_VALIDATION_PATH}/${iban}`,
                     json: true,
                     method: 'POST',
                     headers: {

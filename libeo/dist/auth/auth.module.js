@@ -25,12 +25,8 @@ const common_module_1 = require("../common/common.module");
 const user_entity_1 = require("../common/entities/user.entity");
 const company_entity_1 = require("../common/entities/company.entity");
 const users_service_1 = require("../common/services/users.service");
-const companies_service_1 = require("../common/services/companies.service");
-const contacts_service_1 = require("../common/services/contacts.service");
-const emails_service_1 = require("../common/services/emails.service");
 const token_generator_service_1 = require("../common/services/token-generator.service");
 const auth_resolvers_1 = require("./auth.resolvers");
-const accounting_preferences_service_1 = require("../common/services/accounting-preferences.service");
 const notification_module_1 = require("../notification/notification.module");
 let AuthModule = class AuthModule {
 };
@@ -55,12 +51,8 @@ AuthModule = __decorate([
             auth_service_1.AuthService,
             jwt_strategy_1.JwtStrategy,
             users_service_1.UsersService,
-            companies_service_1.CompaniesService,
-            contacts_service_1.ContactsService,
-            emails_service_1.EmailsService,
             auth_resolvers_1.AuthResolvers,
             token_generator_service_1.TokenGeneratorService,
-            accounting_preferences_service_1.AccountingPreferencesService,
         ],
     })
 ], AuthModule);
